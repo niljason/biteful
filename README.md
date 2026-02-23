@@ -8,13 +8,23 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
 
 1. Install Frontend Dependencies (Node.js)
 
-    Vite and React require **Node.js** and **npm**
+    Vite and React require **Node.js** and **npm**.
 
     ```bash
     sudo apt install nodejs npm
     ```
 
-2. Install Backend Dependencies (C++, Drogon)
+2. Install Packages in Frontend
+
+    You need to install the packages used in the frontend before
+    running the dev server.
+
+    ```bash
+    cd frontend
+    npm install
+    ```
+
+3. Install Backend Dependencies (C++, Drogon)
 
     A C++17 (or higher) compiler and `cmake` is required.
 
@@ -40,7 +50,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     make && sudo make install
     ```
 
-3. Launch the Project
+4. Launch the Project
 
     Navigate into the project's backend folder and compile using:
 
@@ -51,6 +61,17 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     make
     ./backend
     ```
+
+    Then navigate into the frontend folder and run the dev server with:
+
+    ```bash
+    cd ../../frontend
+    npm run dev
+    ```
+
+    The frontend should be visible on port 5173 of localhost.
+    The backend is accessible from port 5555 of localhost but
+    will only return json responses.
 
 ## Authors
 
