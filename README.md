@@ -28,7 +28,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     sudo apt install libjsoncpp-dev uuid-dev zlib1g-dev libssl-dev
     ```
 
-    Installing the drogon framework so that `drogon_ctl` can be used.
+    Install the drogon framework so that `drogon_ctl` can be used.
 
     ```bash
     git clone https://github.com/drogonframework/drogon
@@ -40,7 +40,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     make && sudo make install
     ```
 
-3. Launching the Project
+3. Launch the Project
 
     Navigate into the project's backend folder and compile using:
 
