@@ -11,7 +11,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
 
 1. Install Frontend Dependencies (Node.js)
 
-  Vite and React require **Node.js** and **npm** (Node Package Manager)
+  Vite and React require **Node.js** and **npm**
 
     ```bash
     sudo apt install nodejs npm
