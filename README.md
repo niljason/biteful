@@ -1,12 +1,8 @@
 # biteful
 
----
-
 An app that promotes healthy eating.
 
 ## Instructions
-
----
 
 These instructions were tested on Linux (Ubuntu/Debian) machines.
 
@@ -57,8 +53,6 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     ```
 
 ## Authors
-
----
 
 [Perry Huang](https://github.com/pearmeow)  
 [Angel Mejia](https://github.com/AngelMM26)  
