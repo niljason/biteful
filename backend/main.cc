@@ -3,6 +3,9 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <sstream>
+#include <string>
+
 
 int main() {
     // Set HTTP listener address and port
