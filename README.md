@@ -6,7 +6,13 @@ An app that promotes healthy eating.
 
 These instructions were tested on Linux (Ubuntu/Debian) machines.
 
-1. Install Frontend Dependencies (Node.js)
+1. Clone the Repo
+
+    ```bash
+    git clone git@github.com:niljason/biteful.git
+    ```
+
+2. Install Frontend Dependencies (Node.js)
 
     Vite and React require **Node.js** and **npm**.
 
@@ -14,7 +20,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     sudo apt install nodejs npm
     ```
 
-2. Install Packages in Frontend
+3. Install Packages in Frontend
 
     You need to install the packages used in the frontend before
     running the dev server.
@@ -24,7 +30,15 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     npm install
     ```
 
-3. Install Backend Dependencies (C++, Drogon)
+4. Install Postgres
+
+    A Postgres database is used in the backend.
+
+    ```bash
+    sudo apt install postgresql postgresql-contrib libpq-dev
+    ```
+
+5. Install Backend Dependencies (C++, Drogon)
 
     A C++17 (or higher) compiler and `cmake` is required.
 
@@ -32,16 +46,16 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     sudo apt install git gcc g++ cmake
     ```
 
-    Drogon relies on the `jsoncpp`, `uuid`, `zlib`, and 'yaml'.
+    Drogon relies on `jsoncpp`, `uuid`, `zlib`, and `yaml`.
 
     ```bash
     sudo apt install libjsoncpp-dev uuid-dev zlib1g-dev libssl-dev libyaml-cpp-dev 
     ```
 
-    Navigate outside of the Biteful folder.
     Install the drogon framework so that `drogon_ctl` can be used.
 
     ```bash
+    cd ~
     git clone https://github.com/drogonframework/drogon
     cd drogon
     git submodule update --init
@@ -51,11 +65,13 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     make && sudo make install
     ```
 
-4. Launch the Project
+6. Launch the Project
 
     Navigate into the project's backend folder and compile using:
 
     ```bash
+    cd ~/biteful/backend
+    rm -rf build
     mkdir build
     cd build
     cmake ..
@@ -63,16 +79,27 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     ./backend
     ```
 
+    Then navigate into the backend folder and setup the database with:
+
+    ```bash
+    cd ~/biteful/backend
+     ./init_database.sh
+     ```
+
     Then navigate into the frontend folder and run the dev server with:
 
     ```bash
-    cd ../../frontend
+    cd ~/biteful/frontend
     npm run dev
     ```
 
     The frontend should be visible on port 5173 of localhost.
     The backend is accessible from port 5555 of localhost but
     will only return json responses.
+
+## Other Operating Systems
+
+For other operating systems, installing the tools may be slightly different. Please refer to their documentation.
 
 ## Authors
 
