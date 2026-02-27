@@ -24,9 +24,9 @@ psql -h 127.0.0.1 -U "$DB_USER" -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME
 psql -h 127.0.0.1 -U "$DB_USER" -d postgres -c "CREATE DATABASE $DB_NAME;"
 
 # 4. Apply Migrations
-if [ -d "./sql" ]; then
-    echo "Applying migrations from ./sql..."
-    for file in ./sql/*.sql; do
+if [ -d "./migrations" ]; then
+    echo "Applying migrations from ./migrations..."
+    for file in ./migrations/*.sql; do
         echo "Running $file..."
         psql -h 127.0.0.1 -U "$DB_USER" -d "$DB_NAME" -f "$file"
     done
