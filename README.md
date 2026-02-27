@@ -48,7 +48,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
 
     ```sql
     # Replace user and password with your choice
-    CREATE USER user WITH password 'password'; 
+    CREATE USER user WITH PASSWORD 'password'; 
 
     # Grant the user the ability to create databases
     ALTER ROLE user CREATEDB;
