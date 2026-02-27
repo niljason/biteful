@@ -38,6 +38,30 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     sudo apt install postgresql postgresql-contrib libpq-dev
     ```
 
+    Make sure to setup a postgres user and add the credentials to an `.env` file.
+
+    ```bash
+    sudo -u postgres psql
+    ```
+
+    In your `sql` terminal run the following commands.
+
+    ```sql
+    # Replace user and password with your choice
+    CREATE USER user WITH password 'password'; 
+
+    # Grant the user the ability to create databases
+    ALTER ROLE user CREATEDB;
+    ```
+
+    Your `.env` file should be located in `~/biteful/backend` and look something like the following. Make sure the user and password match what you set above.
+
+    ```bash
+    DB_NAME=biteful
+    DB_USER=user
+    DB_password=password
+    ```
+
 5. Install Backend Dependencies (C++, Drogon)
 
     A C++17 (or higher) compiler and `cmake` is required.
