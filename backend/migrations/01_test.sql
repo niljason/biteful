@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email TEXT NOT NULL,
-    password_hash TEXT NOT NULL
+    id            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username      VARCHAR(50) UNIQUE NOT NULL,
+    email         TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
