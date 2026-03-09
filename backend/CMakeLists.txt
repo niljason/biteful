@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.5)
 project(backend CXX)
 
 include(CheckIncludeFileCXX)
+include(cmake/CPM.cmake)
+
+# Add Libsodium using a CMake-friendly wrapper
+CPMAddPackage(
+    NAME sodium
+    GITHUB_REPOSITORY robinlinden/libsodium-cmake
+    GIT_TAG efe978b574516d7708c0feeb5231cf7ab4906283 # Latest stable wrapper
+)
 
 check_include_file_cxx(any HAS_ANY)
 check_include_file_cxx(string_view HAS_STRING_VIEW)
@@ -20,7 +28,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cc)
-
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
 # to add drogon 
@@ -29,10 +36,13 @@ add_executable(${PROJECT_NAME} main.cc)
 #
 # and comment out the following lines
 find_package(Drogon CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE 
+    Drogon::Drogon
+)
 
 find_package(PostgreSQL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE PostgreSQL::PostgreSQL)
+target_link_libraries(${PROJECT_NAME} PRIVATE PostgreSQL::PostgreSQL sodium)
 
 # ##############################################################################
 
