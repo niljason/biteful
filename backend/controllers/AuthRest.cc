@@ -1,5 +1,11 @@
 #include "AuthRest.h"
+#include <string>
 #include "plugins/SodiumPlugin.h"
+#include <drogon/HttpResponse.h>
+#include <drogon/HttpTypes.h>
+#include <drogon/orm/DbClient.h>
+#include <drogon/orm/Result.h>
+#include <drogon/orm/Exception.h> 
 
 // POST /auth/login
 void AuthRest::login(const HttpRequestPtr &req,
@@ -7,7 +13,9 @@ void AuthRest::login(const HttpRequestPtr &req,
 {
     auto json = req->getJsonObject();
     if (!json) {
-        callback(drogon::HttpResponse::newHttpStatusCode(drogon::k400BadRequest));
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k400BadRequest);
+        callback(resp);
         return;
     }
 
@@ -25,14 +33,20 @@ void AuthRest::login(const HttpRequestPtr &req,
                 if (sodium->verifyPassword(password, storedHash)) {
                     Json::Value ret;
                     ret["token"] = "jwt_token_example"; 
-                    callback(drogon::HttpResponse::newHttpJsonResponse(ret));
+                    auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+                    callback(resp);
                     return;
                 }
             }
-            callback(drogon::HttpResponse::newHttpStatusCode(drogon::k401Unauthorized));
+            // Unauthorized Case
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k401Unauthorized);
+            callback(resp);
         },
         [callback](const drogon::orm::DrogonDbException &e) {
-            callback(drogon::HttpResponse::newHttpStatusCode(drogon::k500InternalServerError));
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k500InternalServerError);
+            callback(resp);
         },
         email);
 }
@@ -41,9 +55,8 @@ void AuthRest::login(const HttpRequestPtr &req,
 void AuthRest::logout(const HttpRequestPtr &req,
                       std::function<void(const HttpResponsePtr &)> &&callback)
 {
-    // In stateless JWT, logout is often handled client-side by deleting the token.
-    // If using server-side sessions or a blacklist:
     Json::Value ret;
     ret["result"] = "logged_out";
-    callback(drogon::HttpResponse::newHttpJsonResponse(ret));
+    auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+    callback(resp);
 }

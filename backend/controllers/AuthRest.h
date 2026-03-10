@@ -1,15 +1,18 @@
 #pragma once
 
 #include <drogon/HttpController.h>
+#include "filters/CorsFilter.h"
+
+using namespace drogon;
 
 class AuthRest : public drogon::HttpController<AuthRest>
 {
   public:
     METHOD_LIST_BEGIN
     // POST /auth/login
-    METHOD_ADD(AuthRest::login, "/login", Post, "CorsFilter");
+    ADD_METHOD_TO(AuthRest::login, "/auth/login", Post, "CorsFilter");
     // POST /auth/logout
-    METHOD_ADD(AuthRest::logout, "/logout", Post, "CorsFilter");
+    ADD_METHOD_TO(AuthRest::logout, "/auth/logout", Post, "CorsFilter");
     METHOD_LIST_END
 
     void login(const HttpRequestPtr &req,
