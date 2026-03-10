@@ -1,5 +1,6 @@
 #include <drogon/drogon.h>
 #include <json/value.h>
+#include "filters/CorsFilter.h"
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
@@ -45,6 +46,7 @@ int main() {
     loadEnv("../.env");
 
     drogon::app().addListener("0.0.0.0", 5555);
+    drogon::app().registerFilter(std::make_shared<CorsFilter>());
 
     Json::Value config;
     std::ifstream jsonFileStream("../config.json", std::ifstream::binary);
@@ -82,11 +84,10 @@ int main() {
 
     drogon::app().loadConfigJson(config);
     
-    // Enable CORS for all origins (for development)
-    drogon::app().registerPostHandlingAdvice([](const drogon::HttpRequestPtr &, const drogon::HttpResponsePtr &resp) {
+    drogon::app().registerPostHandlingAdvice([](const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp) {
         resp->addHeader("Access-Control-Allow-Origin", "*");
-        resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+        resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
     });
     drogon::app().run();
     
