@@ -1,19 +1,17 @@
 #pragma once
 #include <drogon/HttpFilter.h>
+
 #include <string>
 
-class CorsFilter : public drogon::HttpFilter<CorsFilter, false> // Added 'false' here
+class CorsFilter : public drogon::HttpFilter<CorsFilter, false>  // Added 'false' here
 {
-  public:
+public:
     // This is the string name used in METHOD_ADD
     static constexpr char name[] = "CorsFilter";
 
-    void doFilter(const drogon::HttpRequestPtr &req,
-                  drogon::FilterCallback &&fcb,
-                  drogon::FilterChainCallback &&fccb) override
-    {
-        if (req->method() == drogon::Options)
-        {
+    void doFilter(const drogon::HttpRequestPtr& req, drogon::FilterCallback&& fcb,
+                  drogon::FilterChainCallback&& fccb) override {
+        if (req->method() == drogon::Options) {
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k204NoContent);
             resp->addHeader("Access-Control-Allow-Origin", "*");
