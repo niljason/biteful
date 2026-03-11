@@ -2,14 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 project(backend CXX)
 
 include(CheckIncludeFileCXX)
-include(cmake/CPM.cmake)
+# include(cmake/CPM.cmake)
 
-# Add Libsodium using a CMake-friendly wrapper
-CPMAddPackage(
-    NAME sodium
-    GITHUB_REPOSITORY robinlinden/libsodium-cmake
-    GIT_TAG efe978b574516d7708c0feeb5231cf7ab4906283 # Latest stable wrapper
-)
+# Look for the system-installed libsodium
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(sodium REQUIRED IMPORTED_TARGET libsodium)
 
 check_include_file_cxx(any HAS_ANY)
 check_include_file_cxx(string_view HAS_STRING_VIEW)
@@ -42,7 +39,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 find_package(PostgreSQL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE PostgreSQL::PostgreSQL sodium)
+target_link_libraries(${PROJECT_NAME} PRIVATE PostgreSQL::PostgreSQL PkgConfig::sodium)
 
 # ##############################################################################
 
