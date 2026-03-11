@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 
-#include "./filters/CorsFilter.h"
+// #include "./filters/CorsFilter.h"
 
 /**
  * Simple helper to load KEY=VALUE pairs from a .env file
@@ -47,7 +47,31 @@ int main() {
     loadEnv("../.env");
 
     drogon::app().addListener("0.0.0.0", 5555);
-    drogon::app().registerFilter(std::make_shared<CorsFilter>());
+    // GLOBAL PRE-ROUTING: Handle OPTIONS before any controller or other filter
+    drogon::app().registerPreRoutingAdvice([](const drogon::HttpRequestPtr &req, 
+                                              drogon::AdviceCallback &&acb, 
+                                              drogon::AdviceChainCallback &&accb) {
+        if (req->method() == drogon::Options) {
+            auto res = drogon::HttpResponse::newHttpResponse();
+            res->addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+            res->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+            res->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            res->addHeader("Access-Control-Allow-Credentials", "true");
+            res->setStatusCode(drogon::k200OK);
+            acb(res); // Short-circuit: send response now
+        } else {
+            accb(); // Continue to regular routing for GET/POST/etc
+        }
+    });
+
+    // GLOBAL POST-HANDLING: Ensure the actual POST response also has the headers
+    drogon::app().registerPostHandlingAdvice([](const drogon::HttpRequestPtr &, 
+                                                const drogon::HttpResponsePtr &res) {
+        res->addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        res->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+        res->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res->addHeader("Access-Control-Allow-Credentials", "true");
+    });
 
     Json::Value config;
     std::ifstream jsonFileStream("../config.json", std::ifstream::binary);
@@ -84,13 +108,6 @@ int main() {
     }
 
     drogon::app().loadConfigJson(config);
-
-    drogon::app().registerPostHandlingAdvice(
-        [](const drogon::HttpRequestPtr& req, const drogon::HttpResponsePtr& resp) {
-            resp->addHeader("Access-Control-Allow-Origin", "*");
-            resp->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-            resp->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-        });
     drogon::app().run();
 
     return 0;
