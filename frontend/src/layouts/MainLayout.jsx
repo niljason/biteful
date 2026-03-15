@@ -1,43 +1,28 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useState } from "react"
+import { Outlet, useNavigate } from "react-router-dom";
 import auth from "../features/auth/services/auth";
+import Navbar from "../components/layout/Navbar";
 
 const MainLayout = () => {
     const navigate = useNavigate();
-    const isAuthenticated = !!localStorage.getItem("token");
+    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
 
     const handleLogout = () => {
         auth.logout();
+        setIsAuthenticated(false);
         navigate("/login");
     };
 
+    const handleLoginSuccess = () => {
+        setIsAuthenticated(true);
+    }
+
     return (
         <div className="layout-container">
-            <nav className="navbar">
-                <div className="nav-logo">
-                    <Link to="/">DrogonApp</Link>
-                </div>
-                <div className="nav-links">
-                    {isAuthenticated ? (
-                        <>
-                            <Link to="/dashboard">Dashboard</Link>
-                            <button
-                                onClick={handleLogout}
-                                className="logout-btn"
-                            >
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login">Login</Link>
-                            <Link to="/signup">Signup</Link>
-                        </>
-                    )}
-                </div>
-            </nav>
+            <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
 
             <main className="content-area">
-                <Outlet />
+                <Outlet context={handleLoginSuccess} />
             </main>
 
             <footer className="footer">
