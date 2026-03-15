@@ -1,3 +1,4 @@
+#include <drogon/HttpAppFramework.h>
 #include <drogon/drogon.h>
 #include <json/value.h>
 
@@ -48,30 +49,33 @@ int main() {
 
     drogon::app().addListener("0.0.0.0", 5555);
     // GLOBAL PRE-ROUTING: Handle OPTIONS before any controller or other filter
-    drogon::app().registerPreRoutingAdvice([](const drogon::HttpRequestPtr &req, 
-                                              drogon::AdviceCallback &&acb, 
-                                              drogon::AdviceChainCallback &&accb) {
-        if (req->method() == drogon::Options) {
-            auto res = drogon::HttpResponse::newHttpResponse();
-            res->addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-            res->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-            res->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            res->addHeader("Access-Control-Allow-Credentials", "true");
-            res->setStatusCode(drogon::k200OK);
-            acb(res); // Short-circuit: send response now
-        } else {
-            accb(); // Continue to regular routing for GET/POST/etc
-        }
-    });
+    drogon::app().registerPreRoutingAdvice(
+        [](const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& acb, drogon::AdviceChainCallback&& accb) {
+            if (req->method() == drogon::Options) {
+                auto res = drogon::HttpResponse::newHttpResponse();
+                // TODO: change this allow origin to a environment variable of where the frontend is
+                res->addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+                res->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+                // unneeded authorization header for JWTS
+                // res->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+                res->addHeader("Access-Control-Allow-Credentials", "true");
+                res->setStatusCode(drogon::k200OK);
+                acb(res);  // Short-circuit: send response now
+            } else {
+                accb();  // Continue to regular routing for GET/POST/etc
+            }
+        });
 
     // GLOBAL POST-HANDLING: Ensure the actual POST response also has the headers
-    drogon::app().registerPostHandlingAdvice([](const drogon::HttpRequestPtr &, 
-                                                const drogon::HttpResponsePtr &res) {
-        res->addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-        res->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-        res->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-        res->addHeader("Access-Control-Allow-Credentials", "true");
-    });
+    drogon::app().registerPostHandlingAdvice(
+        [](const drogon::HttpRequestPtr&, const drogon::HttpResponsePtr& res) {
+            // TODO: change this allow origin to a environment variable of where the frontend is
+            res->addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+            res->addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+            // unneeded authorization header for JWTS
+            // res->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            res->addHeader("Access-Control-Allow-Credentials", "true");
+        });
 
     Json::Value config;
     std::ifstream jsonFileStream("../config.json", std::ifstream::binary);
