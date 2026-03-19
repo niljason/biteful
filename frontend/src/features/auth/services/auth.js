@@ -12,19 +12,26 @@ const auth = {
             credentials: "include",
         };
         const data = await drogonClient("auth", options);
+        localStorage.setItem("sessionId", data.id);
+        console.log(localStorage.getItem("sessionId"));
         return data;
     },
 
     // clears cookie
-    logout: async (sessionId) => {
+    logout: async () => {
+        if (localStorage.getItem("sessionId") === null) {
+            return;
+        }
         const options = {
-            credentials: "include",
             method: "DELETE",
+            credentials: "include",
         };
-        const data = await fetch(
-            import.meta.env.VITE_API_ENDPOINT + "auth/" + sessionId,
+        const data = await drogonClient(
+            "auth/" + localStorage.getItem("sessionId"),
             options,
         );
+        // sets it back to null for later checking
+        localStorage.removeItem("sessionId");
         return data;
     },
 };
