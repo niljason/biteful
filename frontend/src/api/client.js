@@ -28,9 +28,22 @@ export const drogonClient = async (endpoint, options = {}) => {
             );
         }
 
-        const resp = await response.json();
-        console.log(resp);
-        return resp;
+        // handle json vs non json
+        const contentType = response.headers.get("content-type");
+        for (const val of response.headers) {
+            console.log(val);
+        }
+        if (contentType && contentType.includes("application/json")) {
+            const resp = await response.json();
+            console.log("json resp");
+            console.log(resp);
+            return resp;
+        } else {
+            const resp = await response.text();
+            console.log("test resp");
+            console.log(resp);
+            return resp;
+        }
     } catch (error) {
         console.error("Fetch Check:", error);
         throw error;
