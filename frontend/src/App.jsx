@@ -5,7 +5,12 @@ import SignupForm from "./features/users/components/SignupForm";
 import Dashboard from "./features/users/components/Dashboard";
 
 function App() {
-    // check if cookie exists
+    // check if session id exists
+    const isAuthenticated = () => {
+        return localStorage.getItem("sessionId") !== null;
+    };
+
+    isAuthenticated();
 
     return (
         <BrowserRouter>
@@ -16,10 +21,26 @@ function App() {
                     <Route path="/signup" element={<SignupForm />} />
 
                     {/* Protected Route */}
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route
+                        path="/dashboard"
+                        element={
+                            isAuthenticated() ? (
+                                <Dashboard />
+                            ) : (
+                                <Navigate to="/login" />
+                            )
+                        }
+                    />
 
                     {/* Default Route */}
-                    <Route path="/" element={<Navigate to={"/login"} />} />
+                    <Route
+                        path="/"
+                        element={
+                            <Navigate
+                                to={isAuthenticated() ? "/dashboard" : "/login"}
+                            />
+                        }
+                    />
                 </Route>
             </Routes>
         </BrowserRouter>
