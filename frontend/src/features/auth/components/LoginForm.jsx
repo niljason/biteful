@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const LoginForm = () => {
     const [username, setUsername] = useState("");
@@ -39,6 +39,11 @@ const LoginForm = () => {
                     {loading ? "Authenticating..." : "Login"}
                 </button>
             </form>
+            {/* link to go to signup */}
+            <div className="auth-switch">
+                <span>Don't have an account? </span>
+                <Link to="/signup">Sign Up</Link>
+            </div>
         </div>
     );
 };

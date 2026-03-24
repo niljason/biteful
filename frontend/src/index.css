@@ -51,18 +51,53 @@
 .content-area {
     flex: 1;
     display: flex;
+    padding: 0;
+}
+
+.brand-side { /* side with logo + name biteful*/
+    flex: 1;
+    background-color: #6a1b9a; /*purple*/
+    
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+}
+
+.form-side { /* side with actual login*/
+    flex: 1;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Auth Cards & Inputs */
 .auth-card {
-    border: 1px solid #ddd;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    width: 300px;
+    border: none;
+    box-shadow: none;
+    width: 350px;
+}
+
+.auth-switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+    width: 100%;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-switch a {
+    color: #6a1b9a;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
 }
 
 input {
