@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { userService } from '../services/userService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const SignupForm = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -47,6 +47,10 @@ const SignupForm = () => {
           {status.loading ? 'Creating Account...' : 'Sign Up'}
         </button>
       </form>
+      <div className="auth-switch">
+        <span>Already have an account? </span>
+        <Link to="/login">Login</Link>
+      </div>
     </div>
   );
 };
