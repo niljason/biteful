@@ -23,6 +23,9 @@ const MainLayout = ({ children }) => {
     };
 
     const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+    const isLogin = location.pathname === "/login";
+    const headerText = isLogin ? "WELCOME BACK!" : "JOIN BITEFUL!";
+    const subText = isLogin ? "Ready to continue your journey?" : "Start your adventure with us today!";
     return (
         <div className="layout-container">
             {!isAuthPage && <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />}
@@ -35,7 +38,13 @@ const MainLayout = ({ children }) => {
                             <h1>Biteful</h1>
                         </div>
                         <div className="form-side">
-                            {children}
+                            <div className="auth-card">
+                                <div className="form-header-section">
+                                    <h2 className="auth-header">{headerText}</h2>
+                                    <p className="auth-subtitle">{subText}</p>
+                                </div>
+                                {children}
+                            </div>
                         </div>
                     </>
                 ) : (
