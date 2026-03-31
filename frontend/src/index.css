@@ -139,3 +139,58 @@ button:not(.logout-btn):hover {
     color: #666;
     font-size: 0.9rem;
 }
+
+body {
+    margin: 0;
+    font-family: sans-serif; 
+    color: #333;
+}
+
+.brand-side h1, 
+.form-side h2 {
+    font-family: sans-serif;
+    font-weight: 800; /* Extra bold */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.brand-side h1 {
+    font-size: 3.5rem;
+    color: white;
+}
+
+/* Force buttons and inputs to use the same font */
+button, input {
+    font-family: inherit;
+}
+
+button:not(.logout-btn) {
+    background-color: #7e3ff2; /* That vibrant purple from your image */
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+label {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #7e3ff2;
+}
+
+.brand-logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1rem;
+    image-rendering: -webkit-optimize-contrast; 
+}
+
+.brand-side {
+    flex: 1;
+    background-color: #7e3ff2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
