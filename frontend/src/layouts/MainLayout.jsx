@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import auth from "../features/auth/services/auth";
 import Navbar from "../components/layout/Navbar";
 import { useState } from "react";
+import logoImg from "../assets/biteful_logo.png";
 
 const MainLayout = ({ children }) => {
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ const MainLayout = ({ children }) => {
                 {isAuthPage ? (
                     <>
                         <div className="brand-side">
-                            <div className="brand-icon">🍴</div> 
+                            <img src={logoImg} alt="Biteful Logo" className="brand-logo" />
                             <h1>Biteful</h1>
                         </div>
                         <div className="form-side">
