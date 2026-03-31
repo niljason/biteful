@@ -1,133 +1,116 @@
-/* Layout Shell */
+body {
+    margin: 0;
+    font-family: sans-serif; 
+    color: #333;
+}
+
+button, input {
+    font-family: inherit;
+}
+
 .layout-container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* Navbar Structure */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center; /* Crucial for vertical alignment */
-    padding: 1rem 2rem;
-    background: #2c3e50;
-    color: white;
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Use gap instead of margins for cleaner spacing */
-}
-
-/* Links and Buttons inside Nav */
-.nav-links a, 
-.nav-links .logout-btn {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity 0.2s;
-}
-
-.nav-links a:hover, 
-.nav-links .logout-btn:hover {
-    opacity: 0.8;
-}
-
-/* Specific Reset for Logout Button */
-.logout-btn {
-    background: none !important; /* Force override of general button style */
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: auto !important;     /* Prevents the 100% width from general button */
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-}
-
-/* Content Area */
 .content-area {
     flex: 1;
     display: flex;
-    padding: 0;
 }
 
-.brand-side { /* side with logo + name biteful*/
+/* left side (logo) */
+.brand-side {
     flex: 1;
-    background-color: #6a1b9a; /*purple*/
-    
+    background-color: #7e3ff2;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    color: white;
 }
 
-.form-side { /* side with actual login*/
+.brand-logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.brand-side h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+/* right side (form) */
+.form-side {
     flex: 1;
     background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 2rem;
 }
 
-/* Auth Cards & Inputs */
 .auth-card {
-    border: none;
-    box-shadow: none;
-    width: 350px;
-}
-
-.auth-switch {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    margin-top: 20px;
     width: 100%;
-    font-size: 0.9rem;
+    max-width: 350px;
+}
+
+.form-header-section {
+    margin-bottom: 2rem;
+}
+
+.auth-header {
+    font-family: sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.8rem;
+    color: #4a148c;
+    margin: 0;
+}
+
+.auth-subtitle {
+    font-size: 1rem;
     color: #666;
+    margin-top: 5px;
+    font-weight: 400;
 }
 
-.auth-switch a {
-    color: #6a1b9a;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.auth-switch a:hover {
-    text-decoration: underline;
+/* form */
+label {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #7e3ff2;
+    display: block;
+    margin-bottom: 5px;
 }
 
 input {
     width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
+    margin-bottom: 15px;
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding doesn't break width */
+    border-radius: 6px;
+    box-sizing: border-box;
 }
 
-/* Global Action Buttons (Login/Signup) */
 button:not(.logout-btn) { 
     width: 100%; 
-    padding: 10px; 
-    background: #3498db; 
+    padding: 12px; 
+    background: #7e3ff2; 
     color: white; 
     border: none; 
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
 }
 
 button:not(.logout-btn):hover {
-    background: #2980b9;
-}
-
-/* icon for login/signup */
-.brand-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+    background: #6928e0;
 }
 
 /* footer */
@@ -140,57 +123,25 @@ button:not(.logout-btn):hover {
     font-size: 0.9rem;
 }
 
-body {
-    margin: 0;
-    font-family: sans-serif; 
-    color: #333;
-}
-
-.brand-side h1, 
-.form-side h2 {
-    font-family: sans-serif;
-    font-weight: 800; /* Extra bold */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 0;
-}
-
-.brand-side h1 {
-    font-size: 3.5rem;
-    color: white;
-}
-
-/* Force buttons and inputs to use the same font */
-button, input {
-    font-family: inherit;
-}
-
-button:not(.logout-btn) {
-    background-color: #7e3ff2; /* That vibrant purple from your image */
-    font-weight: 600;
-    text-transform: capitalize;
-}
-
-label {
-    font-weight: 700;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #7e3ff2;
-}
-
-.brand-logo {
-    width: 120px;
-    height: auto;
-    margin-bottom: 1rem;
-    image-rendering: -webkit-optimize-contrast; 
-}
-
-.brand-side {
-    flex: 1;
-    background-color: #7e3ff2;
+/* "Don't have an account? Create account" text area */
+.auth-switch {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: white;
+    gap: 5px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #4a148c; /* This is the Dark Purple */
+    font-weight: 500;
+}
+
+/* The clickable link inside that text */
+.auth-switch a {
+    color: #7e3ff2; /* Keeps the link itself vibrant purple */
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
 }
