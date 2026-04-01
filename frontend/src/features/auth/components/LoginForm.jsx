@@ -20,20 +20,33 @@ const LoginForm = () => {
         <div className="auth-card">
             <h2>Login</h2>
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                <div className="input-group">
+                    <label>Username</label>
+                    <div className="input-wrapper">
+                        <span className="input-icon">👤</span>
+                        <input
+                            type="text"
+                            placeholder="Enter username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                </div>
+                
+                <div className="input-group">
+                    <label>Password</label>
+                    <div className="input-wrapper">
+                        <span className="input-icon">🔒</span>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                </div>
                 {error && <p className="error-text">{error}</p>}
                 <button type="submit" disabled={loading}>
                     {loading ? "Authenticating..." : "Login"}
