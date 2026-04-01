@@ -24,24 +24,45 @@ const SignupForm = () => {
     <div className="auth-card">
       <h2>Create Account</h2>
       <form onSubmit={handleSignup}>
-        <input 
-          type="text" 
-          placeholder="Username" 
-          onChange={(e) => setFormData({...formData, username: e.target.value})} 
-          required 
-        />
-        <input 
-          type="email" 
-          placeholder="Email" 
-          onChange={(e) => setFormData({...formData, email: e.target.value})} 
-          required 
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          onChange={(e) => setFormData({...formData, password: e.target.value})} 
-          required 
-        />
+        <div className="input-group">
+          <label>USERNAME</label>
+          <div className="input-wrapper">
+            <span className="input-icon">👤</span>
+            <input 
+              type="text" 
+              placeholder="Choose a username" 
+              onChange={(e) => setFormData({...formData, username: e.target.value})} 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="input-group">
+          <label>EMAIL ADDRESS</label>
+          <div className="input-wrapper">
+            <span className="input-icon">✉️</span>
+            <input 
+              type="email" 
+              placeholder="your@email.com" 
+              onChange={(e) => setFormData({...formData, email: e.target.value})} 
+              required 
+            />
+          </div>
+        </div>
+
+        <div className="input-group">
+          <label>PASSWORD</label>
+          <div className="input-wrapper">
+            <span className="input-icon">🔒</span>
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              onChange={(e) => setFormData({...formData, password: e.target.value})} 
+              required 
+            />
+          </div>
+        </div>
+
         {status.error && <p className="error-text">{status.error}</p>}
         <button type="submit" disabled={status.loading}>
           {status.loading ? 'Creating Account...' : 'Sign Up'}

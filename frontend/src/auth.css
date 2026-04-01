@@ -1,11 +1,17 @@
 .brand-side {
     flex: 1;
-    background-color: #7e3ff2;
+    /* Replace 'your-image-path.jpg' with your actual file path */
+    background-image: url('./assets/leftbg.png'); 
+    background-size: cover;      /* Scales image to fill the area */
+    background-position: center;  /* Keeps the focus in the middle */
+    background-repeat: no-repeat;
+    background-color: #7e3ff2; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     color: white;
+    padding: 2rem;
 }
 
 .brand-logo { width: 120px; margin-bottom: 1rem; }
@@ -18,13 +24,36 @@
 
 .form-side {
     flex: 1;
-    background-color: #ffffff;
+    background-color: #ffffffca;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .auth-card { width: 100%; max-width: 350px; }
+
+.auth-card button {
+    width: 100%;
+    padding: 10px;
+    background-color: #7e3ff2; /* Vibrant Purple */
+    color: white;
+    border: none;
+    /*border-radius: 12px;*/
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.auth-card button:hover {
+    background-color: #6928e0;
+}
+
+.auth-card button:active {
+    /* The "click" animation */
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #4a148c;
+}
 
 .auth-header {
     font-weight: 800;
@@ -47,4 +76,56 @@
     justify-content: center;
     gap: 5px;
     color: #4a148c;
+}
+
+/* Individual container for each field */
+.input-group {
+    background: white;
+    border: 2px solid #7e3ff2; /* Thick purple border */
+    border-radius: 12px;      /* Rounded corners */
+    padding: 12px;
+    margin-bottom: 20px;
+    /* This creates the 3D 'bottom' effect */
+    box-shadow: 0 5px 0 #4a148c; 
+}
+
+.input-group label {
+    color: #4a148c;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* The inner border box around the actual input */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 2px solid #dcd0ff; /* Light purple inner border */
+    border-radius: 10px;
+    padding: 8px 12px;
+    gap: 10px;
+}
+
+.input-wrapper input {
+    border: none !important; /* Remove the old input borders */
+    padding: 0 !important;
+    margin: 0 !important;
+    outline: none;
+    width: 100%;
+    color: #7e3ff2;
+    font-weight: 600;
+}
+
+/* Styling the little icon box if you want it */
+.input-icon {
+    background: #7e3ff2;
+    color: white;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    font-size: 0.8rem;
 }
