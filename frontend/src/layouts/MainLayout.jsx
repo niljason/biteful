@@ -4,7 +4,7 @@ import Navbar from "../components/layout/Navbar";
 import { useState } from "react";
 import logoImg from "../assets/biteful_logo.png";
 import "../index.css";
-import "../Auth.css";
+import "../auth.css";
 
 const MainLayout = ({ children }) => {
     const navigate = useNavigate();
@@ -24,25 +24,39 @@ const MainLayout = ({ children }) => {
         navigate("/login");
     };
 
-    const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+    const isAuthPage =
+        location.pathname === "/login" || location.pathname === "/signup";
     const isLogin = location.pathname === "/login";
     const headerText = isLogin ? "WELCOME BACK!" : "JOIN BITEFUL!";
-    const subText = isLogin ? "Ready to continue your journey?" : "Start your adventure with us today!";
+    const subText = isLogin
+        ? "Ready to continue your journey?"
+        : "Start your adventure with us today!";
     return (
         <div className="layout-container">
-            {!isAuthPage && <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />}
+            {!isAuthPage && (
+                <Navbar
+                    isAuthenticated={isAuthenticated}
+                    onLogout={handleLogout}
+                />
+            )}
 
             <main className="content-area">
                 {isAuthPage ? (
                     <>
                         <div className="brand-side">
-                            <img src={logoImg} alt="Biteful Logo" className="brand-logo" />
+                            <img
+                                src={logoImg}
+                                alt="Biteful Logo"
+                                className="brand-logo"
+                            />
                             <h1>Biteful</h1>
                         </div>
                         <div className="form-side">
                             <div className="auth-card">
                                 <div className="form-header-section">
-                                    <h2 className="auth-header">{headerText}</h2>
+                                    <h2 className="auth-header">
+                                        {headerText}
+                                    </h2>
                                     <p className="auth-subtitle">{subText}</p>
                                 </div>
                                 {children}
@@ -50,9 +64,7 @@ const MainLayout = ({ children }) => {
                         </div>
                     </>
                 ) : (
-                    <div className="standard-view">
-                        {children}
-                    </div>
+                    <div className="standard-view">{children}</div>
                 )}
             </main>
 
