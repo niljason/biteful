@@ -51,12 +51,13 @@ const router = createBrowserRouter([
         middleware: [isAuthenticated],
     },
     {
-        path: "/pantrymap",
+        path: "/map/pantry",
         element: (
             <MainLayout>
                 <PantryExplorer />
             </MainLayout>
         ),
+        middleware: [isAuthenticated],
     },
 ]);
 
