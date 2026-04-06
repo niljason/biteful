@@ -88,3 +88,85 @@ button:not(.logout-btn) {
 button:not(.logout-btn):hover {
     background: #2980b9;
 }
+
+
+/* --- Pantry Explorer Additions --- */
+
+/* Overrides the flex centering for the Map page only */
+.pantry-page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: flex-start; /* Prevents being squished by parent centering */
+}
+
+.search-header {
+    display: flex;
+    gap: 10px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* We need a specific width override for the search button 
+   because your global CSS makes all buttons 100% width */
+.search-header button {
+    width: auto !important;
+    padding: 0 25px !important;
+    white-space: nowrap;
+}
+
+/* The Map MUST have a height or it will be 0px */
+.map-frame {
+    height: 600px;
+    width: 100%;
+    border-radius: 12px;
+    border: 2px solid #ddd;
+    overflow: hidden; /* Keeps map corners rounded */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1; /* Keeps map below the navbar dropdowns */
+}
+
+/* Ensure the Navbar stays on top of Leaflet layers */
+.navbar {
+    z-index: 1000;
+}
+
+/* Popup Styling for Grouped Data */
+.pantry-popup-container {
+    min-width: 200px;
+    font-family: inherit;
+}
+
+.pantry-popup-container h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+}
+
+.pantry-list-scroll {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.pantry-item-row {
+    padding: 8px 0;
+    border-bottom: 1px solid #f4f4f4;
+    font-size: 13px;
+}
+
+.pantry-item-row span {
+    display: block;
+    font-size: 11px;
+    color: #3498db;
+    font-weight: bold;
+    text-transform: uppercase;
+}

@@ -7,6 +7,7 @@ import MainLayout from "./layouts/MainLayout";
 import LoginForm from "./features/auth/components/LoginForm";
 import SignupForm from "./features/users/components/SignupForm";
 import Dashboard from "./features/users/components/Dashboard";
+import PantryExplorer from "./features/pantries/components/PantryExplorer";
 
 const isAuthenticated = () => {
     if (localStorage.getItem("sessionId") === null) {
@@ -48,6 +49,14 @@ const router = createBrowserRouter([
             </MainLayout>
         ),
         middleware: [isAuthenticated],
+    },
+    {
+        path: "/pantrymap",
+        element: (
+            <MainLayout>
+                <PantryExplorer />
+            </MainLayout>
+        ),
     },
 ]);
 
