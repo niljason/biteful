@@ -62,6 +62,19 @@ SELECT
     phone,
     prog
 FROM staging;
+
+-- NORMALIZE PHONE NUMBERS
+UPDATE $TABLE_NAME
+SET phone = (
+    SELECT 
+        SUBSTRING(digits FROM 1 FOR 3) || '-' ||
+        SUBSTRING(digits FROM 4 FOR 3) || '-' ||
+        SUBSTRING(digits FROM 7 FOR 4)
+    FROM (SELECT REGEXP_REPLACE(phone, '\D', '', 'g') AS digits) AS s
+)
+WHERE phone IS NOT NULL 
+  AND LENGTH(REGEXP_REPLACE(phone, '\D', '', 'g')) >= 10;
+
 EOF
 
 # 5. Cleanup
