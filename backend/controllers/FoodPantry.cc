@@ -6,7 +6,6 @@
 
 #include "../models/FoodPantries.h"
 
-using namespace biteful::controllers;
 using namespace drogon;
 using namespace drogon::orm;
 
