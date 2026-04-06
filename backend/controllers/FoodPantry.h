@@ -1,8 +1,6 @@
 #pragma once
 #include <drogon/HttpController.h>
 
-namespace biteful {
-namespace controllers {
 class FoodPantry : public drogon::HttpController<FoodPantry> {
 public:
     METHOD_LIST_BEGIN
@@ -15,5 +13,3 @@ public:
     void getAllPantries(const drogon::HttpRequestPtr& req,
                         std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 };
-}  // namespace controllers
-}  // namespace biteful
