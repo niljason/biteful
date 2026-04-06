@@ -38,15 +38,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     VITE_API_BASE_URL="http://localhost:5555/"
     ```
 
-4. Adding Leaflet to the Project
-
-    Once Vite and React are ready add the leaflet packages.
-
-    ```bash
-    npm install leaflet react-leaflet
-    ```
-
-5. Install Postgres
+4. Install Postgres
 
     A Postgres database is used in the backend.
 
@@ -79,7 +71,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     DB_PASSWORD=password
     ```
 
-6. Install Backend Dependencies (C++, Drogon, Libsodium)
+5. Install Backend Dependencies (C++, Drogon, Libsodium)
 
     A C++17 (or higher) compiler and `cmake` is required.
 
@@ -108,7 +100,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     make && sudo make install
     ```
 
-7. Launch the Project
+6. Launch the Project
 
     Navigate into the project's backend folder and compile using:
 
