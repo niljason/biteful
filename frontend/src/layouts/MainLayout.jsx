@@ -6,6 +6,7 @@ import AuthFormSide from "../features/auth/components/AuthFormSide.jsx";
 import { useState, useEffect } from "react";
 import "../index.css";
 import "../features/auth/components/auth.css";
+import "../features/pantries/components/pantries.css";
 
 const MainLayout = ({ children }) => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const MainLayout = ({ children }) => {
     i was a bit confused as to why but it lowk refused to work so
     that is why it kinda force logouts regardless lololol? */
 
-    const handleLogout = async () => { 
+    const handleLogout = async () => {
         try {
             // Try to tell the server we are leaving
             await auth.logout();
@@ -34,7 +35,7 @@ const MainLayout = ({ children }) => {
             console.warn("Backend logout failed, but clearing local session.");
         }
         // ALWAYS clear this, regardless of what the backend says
-        localStorage.removeItem("sessionId"); 
+        localStorage.removeItem("sessionId");
         setIsAuthenticated(false);
         navigate("/login");
     };
@@ -52,7 +53,7 @@ const MainLayout = ({ children }) => {
             <main className="content-area">
                 {isAuthPage ? (
                     <>
-                        <BrandSide /> 
+                        <BrandSide />
                         <AuthFormSide pathname={location.pathname}>
                             {children}
                         </AuthFormSide>
@@ -62,7 +63,7 @@ const MainLayout = ({ children }) => {
                 )}
             </main>
 
-            {!isAuthPage && ( 
+            {!isAuthPage && (
                 <footer className="footer">
                     <p>© 2026 Modular React + Drogon C++</p>
                 </footer>
