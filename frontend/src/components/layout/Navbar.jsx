@@ -10,6 +10,7 @@ const Navbar = ({ isAuthenticated, onLogout }) => {
                 {isAuthenticated ? (
                     <>
                         <Link to="/dashboard">Dashboard</Link>
+                        <Link to="/map/pantry"> Pantry </Link>
                         <button onClick={onLogout} className="logout-btn">
                             Logout
                         </button>
