@@ -86,12 +86,8 @@
     position: relative;
 }
 
-.navbar {
-    z-index: 1000;
-}
-
 .pantry-popup-container {
-    min-width: 200px;
+    min-width: 220px;
     font-family: inherit;
 }
 
@@ -99,6 +95,11 @@
     margin: 0 0 5px 0;
     color: #2d0066;
     font-weight: bold;
+    font-size: 0.9rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
 }
 
 .pantry-list-scroll {
@@ -125,18 +126,23 @@
 .pantry-address-link {
     display: block;
     margin: 5px 0;
-    color: #7f8c8d;
-    font-size: 13px;
+    color: #de4a4a !important;
+    font-weight: 600;
     text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.pantry-address-link:hover {
+    text-decoration: underline;
 }
 
 .pantry-phone-link {
     display: inline-block;
     margin: 5px 0;
-    color: #8b3dff;
-    font-size: 13px;
+    color: #de4a4a !important;
+    font-weight: 700;
+    font-size: 0.9rem;
     text-decoration: none;
-    font-weight: 600;
 }
 
 .leaflet-popup-content-wrapper {
@@ -164,31 +170,4 @@
     margin: 15px !important;
     line-height: 1.4 !important;
     width: auto !important;
-}
-
-.pantry-popup-container h3 {
-    color: #2d0066;
-    font-size: 0.9rem;
-    font-weight: 900;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
-}
-
-.pantry-address-link {
-    color: #de4a4a !important;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.pantry-address-link:hover {
-    text-decoration: underline;
-}
-
-.pantry-phone-link {
-    color: #de4a4a  !important;
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-decoration: none;
 }
