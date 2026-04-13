@@ -114,13 +114,15 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     ./backend
     ```
 
-    Then navigate into the backend folder and setup the database and initialize the pantries data with:
+    Then navigate into the backend folder and setup the database and initialize the pantries and restaurants data with:
 
     ```bash
     cd ~/biteful/backend
+    unzip datasets.zip
      ./init_database.sh
      ./init_pantries.sh
      ./init_restaurants.sh
+     rm -rf *.csv
      ```
 
     Then navigate into the frontend folder and run the dev server with:

@@ -13,7 +13,7 @@ echo "127.0.0.1:5432:$DB_NAME:$DB_USER:$DB_PASSWORD" > "$PGPASS_PATH"
 chmod 0600 "$PGPASS_PATH"
 
 # 2. Configuration
-FILE_NAME="./migrations/dohmh_restaurant_04132026.csv"
+FILE_NAME="./dohmh_restaurant_04132026.csv"
 TABLE_NAME="restaurants"
 
 echo "Ingesting NYC Restaurant Data..."
