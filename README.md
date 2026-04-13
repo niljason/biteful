@@ -120,6 +120,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     cd ~/biteful/backend
      ./init_database.sh
      ./init_pantries.sh
+     ./init_restaurants.sh
      ```
 
     Then navigate into the frontend folder and run the dev server with:
