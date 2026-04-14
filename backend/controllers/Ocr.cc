@@ -1,6 +1,8 @@
 #include "Ocr.h"
 
 #include <drogon/HttpClient.h>
+#include <drogon/HttpTypes.h>
+#include <json/reader.h>
 
 #include <fstream>
 
@@ -16,9 +18,19 @@ void Ocr::upload(const HttpRequestPtr& req, std::function<void(const HttpRespons
     // the menu
     //
 
-    // if (FAKING) {
-    //     return;
-    // }
+    if (FAKING) {
+        Json::Reader reader;
+        Json::Value fakeJson;
+        std::string jsonPath = "../fakedata/veryfi_response.json";
+        std::ifstream in(jsonPath);
+        std::ostringstream sstr;
+        sstr << in.rdbuf();
+        reader.parse(sstr.str(), fakeJson);
+
+        HttpResponsePtr response = HttpResponse::newHttpJsonResponse(fakeJson);
+        callback(response);
+        return;
+    }
 
     const std::string ocrApi = std::getenv("OCR_API");
     if (ocrApi.empty()) {
