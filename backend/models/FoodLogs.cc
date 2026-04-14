@@ -15,9 +15,9 @@ using namespace drogon_model::biteful;
 
 const std::string FoodLogs::Cols::_id = "\"id\"";
 const std::string FoodLogs::Cols::_user_id = "\"user_id\"";
-const std::string FoodLogs::Cols::_food_name = "\"food_name\"";
-const std::string FoodLogs::Cols::_points_added = "\"points_added\"";
 const std::string FoodLogs::Cols::_logged_at = "\"logged_at\"";
+const std::string FoodLogs::Cols::_item_name = "\"item_name\"";
+const std::string FoodLogs::Cols::_health_points = "\"health_points\"";
 const std::string FoodLogs::primaryKeyName = "id";
 const bool FoodLogs::hasPrimaryKey = true;
 const std::string FoodLogs::tableName = "\"food_logs\"";
@@ -25,9 +25,9 @@ const std::string FoodLogs::tableName = "\"food_logs\"";
 const std::vector<typename FoodLogs::MetaData> FoodLogs::metaData_={
 {"id","int32_t","integer",4,1,1,1},
 {"user_id","int32_t","integer",4,0,0,0},
-{"food_name","std::string","text",0,0,0,1},
-{"points_added","int32_t","integer",4,0,0,1},
-{"logged_at","::trantor::Date","timestamp with time zone",0,0,0,0}
+{"logged_at","::trantor::Date","timestamp with time zone",0,0,0,0},
+{"item_name","std::string","character varying",255,0,0,1},
+{"health_points","int32_t","integer",4,0,0,1}
 };
 const std::string &FoodLogs::getColumnName(size_t index) noexcept(false)
 {
@@ -45,14 +45,6 @@ FoodLogs::FoodLogs(const Row &r, const ssize_t indexOffset) noexcept
         if(!r["user_id"].isNull())
         {
             userId_=std::make_shared<int32_t>(r["user_id"].as<int32_t>());
-        }
-        if(!r["food_name"].isNull())
-        {
-            foodName_=std::make_shared<std::string>(r["food_name"].as<std::string>());
-        }
-        if(!r["points_added"].isNull())
-        {
-            pointsAdded_=std::make_shared<int32_t>(r["points_added"].as<int32_t>());
         }
         if(!r["logged_at"].isNull())
         {
@@ -75,6 +67,14 @@ FoodLogs::FoodLogs(const Row &r, const ssize_t indexOffset) noexcept
                 }
                 loggedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
+        }
+        if(!r["item_name"].isNull())
+        {
+            itemName_=std::make_shared<std::string>(r["item_name"].as<std::string>());
+        }
+        if(!r["health_points"].isNull())
+        {
+            healthPoints_=std::make_shared<int32_t>(r["health_points"].as<int32_t>());
         }
     }
     else
@@ -99,16 +99,6 @@ FoodLogs::FoodLogs(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 2;
         if(!r[index].isNull())
         {
-            foodName_=std::make_shared<std::string>(r[index].as<std::string>());
-        }
-        index = offset + 3;
-        if(!r[index].isNull())
-        {
-            pointsAdded_=std::make_shared<int32_t>(r[index].as<int32_t>());
-        }
-        index = offset + 4;
-        if(!r[index].isNull())
-        {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
@@ -128,6 +118,16 @@ FoodLogs::FoodLogs(const Row &r, const ssize_t indexOffset) noexcept
                 }
                 loggedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
+        }
+        index = offset + 3;
+        if(!r[index].isNull())
+        {
+            itemName_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 4;
+        if(!r[index].isNull())
+        {
+            healthPoints_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
     }
 
@@ -161,23 +161,7 @@ FoodLogs::FoodLogs(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            foodName_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
-        }
-    }
-    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
-    {
-        dirtyFlag_[3] = true;
-        if(!pJson[pMasqueradingVector[3]].isNull())
-        {
-            pointsAdded_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[3]].asInt64());
-        }
-    }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-    {
-        dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
-        {
-            auto timeStr = pJson[pMasqueradingVector[4]].asString();
+            auto timeStr = pJson[pMasqueradingVector[2]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -196,6 +180,22 @@ FoodLogs::FoodLogs(const Json::Value &pJson, const std::vector<std::string> &pMa
                 }
                 loggedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
+        }
+    }
+    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+    {
+        dirtyFlag_[3] = true;
+        if(!pJson[pMasqueradingVector[3]].isNull())
+        {
+            itemName_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+        }
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull())
+        {
+            healthPoints_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[4]].asInt64());
         }
     }
 }
@@ -218,25 +218,9 @@ FoodLogs::FoodLogs(const Json::Value &pJson) noexcept(false)
             userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
-    if(pJson.isMember("food_name"))
-    {
-        dirtyFlag_[2]=true;
-        if(!pJson["food_name"].isNull())
-        {
-            foodName_=std::make_shared<std::string>(pJson["food_name"].asString());
-        }
-    }
-    if(pJson.isMember("points_added"))
-    {
-        dirtyFlag_[3]=true;
-        if(!pJson["points_added"].isNull())
-        {
-            pointsAdded_=std::make_shared<int32_t>((int32_t)pJson["points_added"].asInt64());
-        }
-    }
     if(pJson.isMember("logged_at"))
     {
-        dirtyFlag_[4]=true;
+        dirtyFlag_[2]=true;
         if(!pJson["logged_at"].isNull())
         {
             auto timeStr = pJson["logged_at"].asString();
@@ -258,6 +242,22 @@ FoodLogs::FoodLogs(const Json::Value &pJson) noexcept(false)
                 }
                 loggedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
+        }
+    }
+    if(pJson.isMember("item_name"))
+    {
+        dirtyFlag_[3]=true;
+        if(!pJson["item_name"].isNull())
+        {
+            itemName_=std::make_shared<std::string>(pJson["item_name"].asString());
+        }
+    }
+    if(pJson.isMember("health_points"))
+    {
+        dirtyFlag_[4]=true;
+        if(!pJson["health_points"].isNull())
+        {
+            healthPoints_=std::make_shared<int32_t>((int32_t)pJson["health_points"].asInt64());
         }
     }
 }
@@ -290,23 +290,7 @@ void FoodLogs::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            foodName_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
-        }
-    }
-    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
-    {
-        dirtyFlag_[3] = true;
-        if(!pJson[pMasqueradingVector[3]].isNull())
-        {
-            pointsAdded_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[3]].asInt64());
-        }
-    }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-    {
-        dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
-        {
-            auto timeStr = pJson[pMasqueradingVector[4]].asString();
+            auto timeStr = pJson[pMasqueradingVector[2]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -325,6 +309,22 @@ void FoodLogs::updateByMasqueradedJson(const Json::Value &pJson,
                 }
                 loggedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
+        }
+    }
+    if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
+    {
+        dirtyFlag_[3] = true;
+        if(!pJson[pMasqueradingVector[3]].isNull())
+        {
+            itemName_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+        }
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull())
+        {
+            healthPoints_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[4]].asInt64());
         }
     }
 }
@@ -346,25 +346,9 @@ void FoodLogs::updateByJson(const Json::Value &pJson) noexcept(false)
             userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
-    if(pJson.isMember("food_name"))
-    {
-        dirtyFlag_[2] = true;
-        if(!pJson["food_name"].isNull())
-        {
-            foodName_=std::make_shared<std::string>(pJson["food_name"].asString());
-        }
-    }
-    if(pJson.isMember("points_added"))
-    {
-        dirtyFlag_[3] = true;
-        if(!pJson["points_added"].isNull())
-        {
-            pointsAdded_=std::make_shared<int32_t>((int32_t)pJson["points_added"].asInt64());
-        }
-    }
     if(pJson.isMember("logged_at"))
     {
-        dirtyFlag_[4] = true;
+        dirtyFlag_[2] = true;
         if(!pJson["logged_at"].isNull())
         {
             auto timeStr = pJson["logged_at"].asString();
@@ -386,6 +370,22 @@ void FoodLogs::updateByJson(const Json::Value &pJson) noexcept(false)
                 }
                 loggedAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
+        }
+    }
+    if(pJson.isMember("item_name"))
+    {
+        dirtyFlag_[3] = true;
+        if(!pJson["item_name"].isNull())
+        {
+            itemName_=std::make_shared<std::string>(pJson["item_name"].asString());
+        }
+    }
+    if(pJson.isMember("health_points"))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson["health_points"].isNull())
+        {
+            healthPoints_=std::make_shared<int32_t>((int32_t)pJson["health_points"].asInt64());
         }
     }
 }
@@ -434,45 +434,6 @@ void FoodLogs::setUserIdToNull() noexcept
     dirtyFlag_[1] = true;
 }
 
-const std::string &FoodLogs::getValueOfFoodName() const noexcept
-{
-    static const std::string defaultValue = std::string();
-    if(foodName_)
-        return *foodName_;
-    return defaultValue;
-}
-const std::shared_ptr<std::string> &FoodLogs::getFoodName() const noexcept
-{
-    return foodName_;
-}
-void FoodLogs::setFoodName(const std::string &pFoodName) noexcept
-{
-    foodName_ = std::make_shared<std::string>(pFoodName);
-    dirtyFlag_[2] = true;
-}
-void FoodLogs::setFoodName(std::string &&pFoodName) noexcept
-{
-    foodName_ = std::make_shared<std::string>(std::move(pFoodName));
-    dirtyFlag_[2] = true;
-}
-
-const int32_t &FoodLogs::getValueOfPointsAdded() const noexcept
-{
-    static const int32_t defaultValue = int32_t();
-    if(pointsAdded_)
-        return *pointsAdded_;
-    return defaultValue;
-}
-const std::shared_ptr<int32_t> &FoodLogs::getPointsAdded() const noexcept
-{
-    return pointsAdded_;
-}
-void FoodLogs::setPointsAdded(const int32_t &pPointsAdded) noexcept
-{
-    pointsAdded_ = std::make_shared<int32_t>(pPointsAdded);
-    dirtyFlag_[3] = true;
-}
-
 const ::trantor::Date &FoodLogs::getValueOfLoggedAt() const noexcept
 {
     static const ::trantor::Date defaultValue = ::trantor::Date();
@@ -487,11 +448,50 @@ const std::shared_ptr<::trantor::Date> &FoodLogs::getLoggedAt() const noexcept
 void FoodLogs::setLoggedAt(const ::trantor::Date &pLoggedAt) noexcept
 {
     loggedAt_ = std::make_shared<::trantor::Date>(pLoggedAt);
-    dirtyFlag_[4] = true;
+    dirtyFlag_[2] = true;
 }
 void FoodLogs::setLoggedAtToNull() noexcept
 {
     loggedAt_.reset();
+    dirtyFlag_[2] = true;
+}
+
+const std::string &FoodLogs::getValueOfItemName() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(itemName_)
+        return *itemName_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &FoodLogs::getItemName() const noexcept
+{
+    return itemName_;
+}
+void FoodLogs::setItemName(const std::string &pItemName) noexcept
+{
+    itemName_ = std::make_shared<std::string>(pItemName);
+    dirtyFlag_[3] = true;
+}
+void FoodLogs::setItemName(std::string &&pItemName) noexcept
+{
+    itemName_ = std::make_shared<std::string>(std::move(pItemName));
+    dirtyFlag_[3] = true;
+}
+
+const int32_t &FoodLogs::getValueOfHealthPoints() const noexcept
+{
+    static const int32_t defaultValue = int32_t();
+    if(healthPoints_)
+        return *healthPoints_;
+    return defaultValue;
+}
+const std::shared_ptr<int32_t> &FoodLogs::getHealthPoints() const noexcept
+{
+    return healthPoints_;
+}
+void FoodLogs::setHealthPoints(const int32_t &pHealthPoints) noexcept
+{
+    healthPoints_ = std::make_shared<int32_t>(pHealthPoints);
     dirtyFlag_[4] = true;
 }
 
@@ -503,9 +503,9 @@ const std::vector<std::string> &FoodLogs::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "user_id",
-        "food_name",
-        "points_added",
-        "logged_at"
+        "logged_at",
+        "item_name",
+        "health_points"
     };
     return inCols;
 }
@@ -525,9 +525,9 @@ void FoodLogs::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getFoodName())
+        if(getLoggedAt())
         {
-            binder << getValueOfFoodName();
+            binder << getValueOfLoggedAt();
         }
         else
         {
@@ -536,9 +536,9 @@ void FoodLogs::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[3])
     {
-        if(getPointsAdded())
+        if(getItemName())
         {
-            binder << getValueOfPointsAdded();
+            binder << getValueOfItemName();
         }
         else
         {
@@ -547,9 +547,9 @@ void FoodLogs::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[4])
     {
-        if(getLoggedAt())
+        if(getHealthPoints())
         {
-            binder << getValueOfLoggedAt();
+            binder << getValueOfHealthPoints();
         }
         else
         {
@@ -595,9 +595,9 @@ void FoodLogs::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getFoodName())
+        if(getLoggedAt())
         {
-            binder << getValueOfFoodName();
+            binder << getValueOfLoggedAt();
         }
         else
         {
@@ -606,9 +606,9 @@ void FoodLogs::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[3])
     {
-        if(getPointsAdded())
+        if(getItemName())
         {
-            binder << getValueOfPointsAdded();
+            binder << getValueOfItemName();
         }
         else
         {
@@ -617,9 +617,9 @@ void FoodLogs::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[4])
     {
-        if(getLoggedAt())
+        if(getHealthPoints())
         {
-            binder << getValueOfLoggedAt();
+            binder << getValueOfHealthPoints();
         }
         else
         {
@@ -646,22 +646,6 @@ Json::Value FoodLogs::toJson() const
     {
         ret["user_id"]=Json::Value();
     }
-    if(getFoodName())
-    {
-        ret["food_name"]=getValueOfFoodName();
-    }
-    else
-    {
-        ret["food_name"]=Json::Value();
-    }
-    if(getPointsAdded())
-    {
-        ret["points_added"]=getValueOfPointsAdded();
-    }
-    else
-    {
-        ret["points_added"]=Json::Value();
-    }
     if(getLoggedAt())
     {
         ret["logged_at"]=getLoggedAt()->toDbStringLocal();
@@ -669,6 +653,22 @@ Json::Value FoodLogs::toJson() const
     else
     {
         ret["logged_at"]=Json::Value();
+    }
+    if(getItemName())
+    {
+        ret["item_name"]=getValueOfItemName();
+    }
+    else
+    {
+        ret["item_name"]=Json::Value();
+    }
+    if(getHealthPoints())
+    {
+        ret["health_points"]=getValueOfHealthPoints();
+    }
+    else
+    {
+        ret["health_points"]=Json::Value();
     }
     return ret;
 }
@@ -708,9 +708,9 @@ Json::Value FoodLogs::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty())
         {
-            if(getFoodName())
+            if(getLoggedAt())
             {
-                ret[pMasqueradingVector[2]]=getValueOfFoodName();
+                ret[pMasqueradingVector[2]]=getLoggedAt()->toDbStringLocal();
             }
             else
             {
@@ -719,9 +719,9 @@ Json::Value FoodLogs::toMasqueradedJson(
         }
         if(!pMasqueradingVector[3].empty())
         {
-            if(getPointsAdded())
+            if(getItemName())
             {
-                ret[pMasqueradingVector[3]]=getValueOfPointsAdded();
+                ret[pMasqueradingVector[3]]=getValueOfItemName();
             }
             else
             {
@@ -730,9 +730,9 @@ Json::Value FoodLogs::toMasqueradedJson(
         }
         if(!pMasqueradingVector[4].empty())
         {
-            if(getLoggedAt())
+            if(getHealthPoints())
             {
-                ret[pMasqueradingVector[4]]=getLoggedAt()->toDbStringLocal();
+                ret[pMasqueradingVector[4]]=getValueOfHealthPoints();
             }
             else
             {
@@ -758,22 +758,6 @@ Json::Value FoodLogs::toMasqueradedJson(
     {
         ret["user_id"]=Json::Value();
     }
-    if(getFoodName())
-    {
-        ret["food_name"]=getValueOfFoodName();
-    }
-    else
-    {
-        ret["food_name"]=Json::Value();
-    }
-    if(getPointsAdded())
-    {
-        ret["points_added"]=getValueOfPointsAdded();
-    }
-    else
-    {
-        ret["points_added"]=Json::Value();
-    }
     if(getLoggedAt())
     {
         ret["logged_at"]=getLoggedAt()->toDbStringLocal();
@@ -781,6 +765,22 @@ Json::Value FoodLogs::toMasqueradedJson(
     else
     {
         ret["logged_at"]=Json::Value();
+    }
+    if(getItemName())
+    {
+        ret["item_name"]=getValueOfItemName();
+    }
+    else
+    {
+        ret["item_name"]=Json::Value();
+    }
+    if(getHealthPoints())
+    {
+        ret["health_points"]=getValueOfHealthPoints();
+    }
+    else
+    {
+        ret["health_points"]=Json::Value();
     }
     return ret;
 }
@@ -797,29 +797,24 @@ bool FoodLogs::validateJsonForCreation(const Json::Value &pJson, std::string &er
         if(!validJsonOfField(1, "user_id", pJson["user_id"], err, true))
             return false;
     }
-    if(pJson.isMember("food_name"))
-    {
-        if(!validJsonOfField(2, "food_name", pJson["food_name"], err, true))
-            return false;
-    }
-    else
-    {
-        err="The food_name column cannot be null";
-        return false;
-    }
-    if(pJson.isMember("points_added"))
-    {
-        if(!validJsonOfField(3, "points_added", pJson["points_added"], err, true))
-            return false;
-    }
-    else
-    {
-        err="The points_added column cannot be null";
-        return false;
-    }
     if(pJson.isMember("logged_at"))
     {
-        if(!validJsonOfField(4, "logged_at", pJson["logged_at"], err, true))
+        if(!validJsonOfField(2, "logged_at", pJson["logged_at"], err, true))
+            return false;
+    }
+    if(pJson.isMember("item_name"))
+    {
+        if(!validJsonOfField(3, "item_name", pJson["item_name"], err, true))
+            return false;
+    }
+    else
+    {
+        err="The item_name column cannot be null";
+        return false;
+    }
+    if(pJson.isMember("health_points"))
+    {
+        if(!validJsonOfField(4, "health_points", pJson["health_points"], err, true))
             return false;
     }
     return true;
@@ -857,11 +852,6 @@ bool FoodLogs::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[2] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[3].empty())
       {
@@ -909,19 +899,19 @@ bool FoodLogs::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(1, "user_id", pJson["user_id"], err, false))
             return false;
     }
-    if(pJson.isMember("food_name"))
-    {
-        if(!validJsonOfField(2, "food_name", pJson["food_name"], err, false))
-            return false;
-    }
-    if(pJson.isMember("points_added"))
-    {
-        if(!validJsonOfField(3, "points_added", pJson["points_added"], err, false))
-            return false;
-    }
     if(pJson.isMember("logged_at"))
     {
-        if(!validJsonOfField(4, "logged_at", pJson["logged_at"], err, false))
+        if(!validJsonOfField(2, "logged_at", pJson["logged_at"], err, false))
+            return false;
+    }
+    if(pJson.isMember("item_name"))
+    {
+        if(!validJsonOfField(3, "item_name", pJson["item_name"], err, false))
+            return false;
+    }
+    if(pJson.isMember("health_points"))
+    {
+        if(!validJsonOfField(4, "health_points", pJson["health_points"], err, false))
             return false;
     }
     return true;
@@ -1013,8 +1003,7 @@ bool FoodLogs::validJsonOfField(size_t index,
         case 2:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -1028,18 +1017,27 @@ bool FoodLogs::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isInt())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            if(pJson.isString() && std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>{}
+                .from_bytes(pJson.asCString()).size() > 255)
+            {
+                err="String length exceeds limit for the " +
+                    fieldName +
+                    " field (the maximum value is 255)";
                 return false;
             }
             break;
         case 4:
             if(pJson.isNull())
             {
-                return true;
+                err="The " + fieldName + " column cannot be null";
+                return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;

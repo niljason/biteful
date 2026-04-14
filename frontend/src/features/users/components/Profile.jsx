@@ -137,15 +137,15 @@ const Profile = () => {
                         <div className="activity-list">
                             {(user.food_logs || []).map((log, index) => (
                                 <div key={index} className="activity-row">
-                                    <div className={`icon-circle ${log.health_points >= 0 ? 'pos' : 'neg'}`}>
-                                        {log.health_points >= 0 ? '+' : '-'}
+                                    <div className={`icon-circle ${log.health_score >= 0 ? 'pos' : 'neg'}`}>
+                                        {log.health_score >= 0 ? '+' : '-'}
                                     </div>
                                     <div className="activity-details">
                                         <p><strong>{log.item_name}</strong></p>
                                         <small>{new Date(log.logged_at).toLocaleDateString()}</small>
                                     </div>
-                                    <div className={`activity-points ${log.health_points >= 0 ? 'text-green' : 'text-red'}`}>
-                                        {log.health_points >= 0 ? `+${log.health_points}` : log.health_points}
+                                    <div className={`activity-points ${log.health_score >= 0 ? 'text-green' : 'text-red'}`}>
+                                        {log.health_score >= 0 ? `+${log.health_score}` : log.health_score}
                                     </div>
                                 </div>
                             ))}

@@ -7,6 +7,7 @@
 using namespace drogon;
 
 // POST /users
+// create account (fr1.1)
 void User::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) {
     auto json = req->getJsonObject();
     if (!json) {
@@ -49,14 +50,14 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
         username, email, hashed);
 }
 
-// GET /users/{id}
-// GET /users/{id}
+// GET /users/{id} 
+// read and view profile (fr1.2) 
 void User::getOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
                   std::string&& id) {
     auto dbClient = app().getDbClient();
     std::string userId = id;
 
-    // 1. Fetch User Profile (now including 'phone')
+    // 1. Fetch User Profile
     dbClient->execSqlAsync(
         "SELECT id, username, email, phone, display_name, dietary_preferences, health_score FROM users WHERE id = $1",
         [callback, dbClient, userId](const drogon::orm::Result& res) {
@@ -76,7 +77,8 @@ void User::getOne(const HttpRequestPtr& req, std::function<void(const HttpRespon
             user["dietary_preferences"] = res[0]["dietary_preferences"].isNull() ? "" : res[0]["dietary_preferences"].as<std::string>();
             user["health_score"]        = res[0]["health_score"].isNull() ? 0 : res[0]["health_score"].as<int>();
 
-            // 2. Fetch Aggregated Stats (Healthy vs Unhealthy totals)
+            // 2. Fetch Aggregated Stats
+            // maintain health score + see attributes (fr1.5 + fr1.6)
             dbClient->execSqlAsync(
                 "SELECT "
                 "COALESCE(SUM(CASE WHEN health_points > 0 THEN health_points ELSE 0 END), 0) as healthy_sum, "
@@ -86,7 +88,7 @@ void User::getOne(const HttpRequestPtr& req, std::function<void(const HttpRespon
                     user["stats"]["healthy"] = stats[0]["healthy_sum"].as<int>();
                     user["stats"]["unhealthy"] = stats[0]["unhealthy_sum"].as<int>();
 
-                    // 3. Fetch Recent Activity (Food Logs)
+                    // 3. Fetch Recent Activity 
                     dbClient->execSqlAsync(
                         "SELECT item_name, health_points, logged_at::text FROM food_logs WHERE user_id = $1 ORDER BY logged_at DESC LIMIT 20",
                         [callback, user](const drogon::orm::Result& logs) mutable {
@@ -133,14 +135,13 @@ void User::updateOne(const HttpRequestPtr& req, std::function<void(const HttpRes
         return;
     }
 
-    // 1. Pull the new phone field from the JSON request
     std::string displayName = json->get("display_name", "").asString();
     std::string dietaryPrefs = json->get("dietary_preferences", "").asString();
     std::string phone = json->get("phone", "").asString(); // <--- ADD THIS
 
     auto dbClient = app().getDbClient();
     
-    // 2. Update the SQL to include the phone column ($3)
+    // Update SQL to include the phone column
     dbClient->execSqlAsync(
         "UPDATE users SET display_name = $1, dietary_preferences = $2, phone = $3 WHERE id = $4",
         [callback](const drogon::orm::Result& res) {
@@ -156,7 +157,7 @@ void User::updateOne(const HttpRequestPtr& req, std::function<void(const HttpRes
             resp->setStatusCode(k500InternalServerError);
             callback(resp);
         },
-        displayName, dietaryPrefs, phone, id); // <--- PASS PHONE HERE
+        displayName, dietaryPrefs, phone, id);
 }
 
 void User::deleteOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
@@ -203,7 +204,6 @@ void User::logFood(const HttpRequestPtr& req, std::function<void(const HttpRespo
     dbClient->execSqlAsync(
         "INSERT INTO food_logs (user_id, item_name, health_points) VALUES ($1, $2, $3)",
         [callback, dbClient, userId, healthPoints](const drogon::orm::Result& res) {
-            // Update the running health_score total (fr1.5)
             dbClient->execSqlAsync(
                 "UPDATE users SET health_score = health_score + $1 WHERE id = $2",
                 [callback](const drogon::orm::Result&) {

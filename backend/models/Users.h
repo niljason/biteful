@@ -49,6 +49,10 @@ class Users
         static const std::string _email;
         static const std::string _password_hash;
         static const std::string _created_at;
+        static const std::string _display_name;
+        static const std::string _dietary_preferences;
+        static const std::string _health_score;
+        static const std::string _phone;
     };
 
     static const int primaryKeyNumber;
@@ -144,8 +148,47 @@ class Users
     void setCreatedAt(const ::trantor::Date &pCreatedAt) noexcept;
     void setCreatedAtToNull() noexcept;
 
+    /**  For column display_name  */
+    ///Get the value of the column display_name, returns the default value if the column is null
+    const std::string &getValueOfDisplayName() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getDisplayName() const noexcept;
+    ///Set the value of the column display_name
+    void setDisplayName(const std::string &pDisplayName) noexcept;
+    void setDisplayName(std::string &&pDisplayName) noexcept;
+    void setDisplayNameToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 5;  }
+    /**  For column dietary_preferences  */
+    ///Get the value of the column dietary_preferences, returns the default value if the column is null
+    const std::string &getValueOfDietaryPreferences() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getDietaryPreferences() const noexcept;
+    ///Set the value of the column dietary_preferences
+    void setDietaryPreferences(const std::string &pDietaryPreferences) noexcept;
+    void setDietaryPreferences(std::string &&pDietaryPreferences) noexcept;
+    void setDietaryPreferencesToNull() noexcept;
+
+    /**  For column health_score  */
+    ///Get the value of the column health_score, returns the default value if the column is null
+    const int32_t &getValueOfHealthScore() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t> &getHealthScore() const noexcept;
+    ///Set the value of the column health_score
+    void setHealthScore(const int32_t &pHealthScore) noexcept;
+    void setHealthScoreToNull() noexcept;
+
+    /**  For column phone  */
+    ///Get the value of the column phone, returns the default value if the column is null
+    const std::string &getValueOfPhone() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getPhone() const noexcept;
+    ///Set the value of the column phone
+    void setPhone(const std::string &pPhone) noexcept;
+    void setPhone(std::string &&pPhone) noexcept;
+    void setPhoneToNull() noexcept;
+
+
+    static size_t getColumnNumber() noexcept {  return 9;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -172,6 +215,10 @@ class Users
     std::shared_ptr<std::string> email_;
     std::shared_ptr<std::string> passwordHash_;
     std::shared_ptr<::trantor::Date> createdAt_;
+    std::shared_ptr<std::string> displayName_;
+    std::shared_ptr<std::string> dietaryPreferences_;
+    std::shared_ptr<int32_t> healthScore_;
+    std::shared_ptr<std::string> phone_;
     struct MetaData
     {
         const std::string colName_;
@@ -183,7 +230,7 @@ class Users
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[5]={ false };
+    bool dirtyFlag_[9]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -224,6 +271,27 @@ class Users
         {
             needSelection=true;
         }
+        if(dirtyFlag_[5])
+        {
+            sql += "display_name,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[6])
+        {
+            sql += "dietary_preferences,";
+            ++parametersCount;
+        }
+        sql += "health_score,";
+        ++parametersCount;
+        if(!dirtyFlag_[7])
+        {
+            needSelection=true;
+        }
+        if(dirtyFlag_[8])
+        {
+            sql += "phone,";
+            ++parametersCount;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -260,6 +328,30 @@ class Users
         else
         {
             sql +="default,";
+        }
+        if(dirtyFlag_[5])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[6])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[7])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        else
+        {
+            sql +="default,";
+        }
+        if(dirtyFlag_[8])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
         }
         if(parametersCount > 0)
         {
