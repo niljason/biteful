@@ -7,6 +7,7 @@ const PantryExplorer = () => {
     const { groups, loading, error } = usePantries();
     const [searchZip, setSearchZip] = useState("");
     const [mapTarget, setMapTarget] = useState(null);
+    const [geoLoading, setGeoLoading] = useState(false);
 
     // If loading, show a message instead of the map
     if (loading) return <div className="loading">Loading pantry data...</div>;
@@ -22,6 +23,28 @@ const PantryExplorer = () => {
             alert("No pantries found for that zip code.");
         }
     }
+
+    const handleUseMyLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        setGeoLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setMapTarget({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                });
+                setGeoLoading(false);
+            },
+            (err) => {
+                setGeoLoading(false);
+                alert("Unable to retrieve your location. Please check your permissions.");
+            }
+        );
+    };
 
     return (
         <div className="pantry-page-container">
@@ -42,6 +65,29 @@ const PantryExplorer = () => {
                         onChange={(e) => setSearchZip(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     />
+                    <div
+                        className={`pantry-geo-button-sq ${geoLoading ? 'is-loading' : ''}`}
+                        onClick={handleUseMyLocation}
+                        title="Use current location"
+                    >
+                        {geoLoading ? (
+                            <span className="pantry-spinner"></span>
+                        ) : (
+                            <svg 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                className="geo-icon-svg"
+                            >
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 2v3m0 14v3m10-10h-3M5 12H2"></path>
+                                <circle cx="12" cy="12" r="7"></circle>
+                            </svg>
+                        )}
+                    </div>
                 </div>
             </div>
 

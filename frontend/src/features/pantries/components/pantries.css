@@ -9,13 +9,13 @@
 }
 
 .pantry-search-block {
-    background-color: #f8f7ff; 
+    background-color: #f8f7ff;
     border: 2px solid #8b3dff;
     border-radius: 16px;
     padding: 10px 10px;
-    width: 350px; 
-    margin: 10px 0; 
-    box-shadow: 0 5px 0px #6a2cc7; 
+    width: 350px;
+    margin: 10px 0;
+    box-shadow: 0 5px 0px #6a2cc7;
 }
 
 .pantry-search-header {
@@ -42,7 +42,7 @@
     display: flex;
     align-items: center;
     background: white;
-    border: 2px solid #c2b2ff; 
+    border: 2px solid #c2b2ff;
     border-radius: 12px;
     padding: 4px;
 }
@@ -150,7 +150,7 @@
     color: #2d0066 !important;
     border: 2px solid #8b3dff !important;
     border-radius: 12px !important;
-    box-shadow: 0 4px 0px #6a2cc7 !important; 
+    box-shadow: 0 4px 0px #6a2cc7 !important;
     padding: 0 !important;
 }
 
@@ -170,4 +170,58 @@
     margin: 15px !important;
     line-height: 1.4 !important;
     width: auto !important;
+}
+
+/* The SVG Icon */
+.geo-icon-svg {
+    width: 20px;
+    height: 20px;
+    color: #007AFF;
+    transition: transform 0.2s ease;
+}
+
+.pantry-geo-button-sq:hover .geo-icon-svg {
+    transform: scale(1.5);
+    color: #0056b3;
+}
+
+.pantry-geo-button-sq {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent !important;
+    /* border-left: 1px solid #f0f0f0;  */
+    flex-shrink: 0;
+}
+
+/* The Spinner - No background, just the ring */
+.pantry-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid #007AFF;
+    border-radius: 50%;
+
+    display: block;
+    box-sizing: border-box;
+    animation: pantry-rotation 0.8s linear infinite;
+}
+
+@keyframes pantry-rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pantry-geo-button-sq.is-loading {
+    background-color: transparent !important;
+    cursor: default;
+    box-shadow: none !important;
 }
