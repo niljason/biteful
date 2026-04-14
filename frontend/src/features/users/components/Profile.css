@@ -1,36 +1,50 @@
-/* src/features/users/components/Profile.css */
+/* Layout Containers */
 .profile-container {
-    padding: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-    color: #333;
+    max-width: 1000px;
+    margin: auto;
+    font-family: sans-serif;
 }
 
-.profile-header {
+/* Side-by-Side Top (Name and Pigeon) */
+.profile-top-grid {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 20px;
 }
 
-.score-badge {
-    background: #4caf50;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-align: center;
+/* Side-by-Side Main (Left Column and Right Column) */
+.profile-main-grid {
+    display: flex;
+    gap: 20px;
 }
 
-.log-item {
+.left-column { flex: 2; }  /* Takes up 2/3 of space */
+.right-column { flex: 1; } /* Takes up 1/3 of space */
+
+/* Basic Card Boxing */
+section, .identity-card, .pigeon-card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Simple list for activity */
+.activity-row {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #fafafa;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
 }
 
-.points {
-    color: #4caf50;
-    font-weight: bold;
+/* Stats Layout */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+/* Hide inputs unless editing */
+input {
+    width: 100%;
+    padding: 5px;
 }

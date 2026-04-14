@@ -50,15 +50,15 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
 }
 
 // GET /users/{id}
+// GET /users/{id}
 void User::getOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
                   std::string&& id) {
     auto dbClient = app().getDbClient();
-
-    // Capture id by value since we use it in nested lambda
     std::string userId = id;
 
+    // 1. Fetch User Profile (now including 'phone')
     dbClient->execSqlAsync(
-        "SELECT id, username, email, display_name, dietary_preferences, health_score FROM users WHERE id = $1",
+        "SELECT id, username, email, phone, display_name, dietary_preferences, health_score FROM users WHERE id = $1",
         [callback, dbClient, userId](const drogon::orm::Result& res) {
             if (res.size() == 0) {
                 auto resp = HttpResponse::newHttpResponse();
@@ -71,39 +71,54 @@ void User::getOne(const HttpRequestPtr& req, std::function<void(const HttpRespon
             user["id"]                  = res[0]["id"].as<int>();
             user["username"]            = res[0]["username"].as<std::string>();
             user["email"]               = res[0]["email"].as<std::string>();
+            user["phone"]               = res[0]["phone"].isNull() ? "" : res[0]["phone"].as<std::string>();
             user["display_name"]        = res[0]["display_name"].isNull() ? "" : res[0]["display_name"].as<std::string>();
             user["dietary_preferences"] = res[0]["dietary_preferences"].isNull() ? "" : res[0]["dietary_preferences"].as<std::string>();
             user["health_score"]        = res[0]["health_score"].isNull() ? 0 : res[0]["health_score"].as<int>();
 
-            // Fetch food logs for this user
+            // 2. Fetch Aggregated Stats (Healthy vs Unhealthy totals)
             dbClient->execSqlAsync(
-                "SELECT item_name, health_points, logged_at FROM food_logs WHERE user_id = $1 ORDER BY logged_at DESC LIMIT 20",
-                [callback, user](const drogon::orm::Result& logs) mutable {
-                    Json::Value logArray(Json::arrayValue);
-                    for (const auto& row : logs) {
-                        Json::Value entry;
-                        entry["item_name"]     = row["item_name"].as<std::string>();
-                        entry["health_points"] = row["health_points"].as<int>();
-                        entry["logged_at"]     = row["logged_at"].as<std::string>();
-                        logArray.append(entry);
-                    }
-                    user["food_logs"] = logArray;
+                "SELECT "
+                "COALESCE(SUM(CASE WHEN health_points > 0 THEN health_points ELSE 0 END), 0) as healthy_sum, "
+                "COALESCE(SUM(CASE WHEN health_points < 0 THEN ABS(health_points) ELSE 0 END), 0) as unhealthy_sum "
+                "FROM food_logs WHERE user_id = $1",
+                [callback, dbClient, userId, user](const drogon::orm::Result& stats) mutable {
+                    user["stats"]["healthy"] = stats[0]["healthy_sum"].as<int>();
+                    user["stats"]["unhealthy"] = stats[0]["unhealthy_sum"].as<int>();
 
-                    auto resp = HttpResponse::newHttpJsonResponse(user);
-                    resp->setStatusCode(k200OK);
-                    callback(resp);
+                    // 3. Fetch Recent Activity (Food Logs)
+                    dbClient->execSqlAsync(
+                        "SELECT item_name, health_points, logged_at::text FROM food_logs WHERE user_id = $1 ORDER BY logged_at DESC LIMIT 20",
+                        [callback, user](const drogon::orm::Result& logs) mutable {
+                            Json::Value logArray(Json::arrayValue);
+                            for (const auto& row : logs) {
+                                Json::Value entry;
+                                entry["item_name"]     = row["item_name"].as<std::string>();
+                                entry["health_points"] = row["health_points"].as<int>();
+                                entry["logged_at"]     = row["logged_at"].as<std::string>();
+                                logArray.append(entry);
+                            }
+                            user["food_logs"] = logArray;
+
+                            auto resp = HttpResponse::newHttpJsonResponse(user);
+                            resp->setStatusCode(k200OK);
+                            callback(resp);
+                        },
+                        [callback](const drogon::orm::DrogonDbException& e) {
+                            LOG_ERROR << "Logs Error: " << e.base().what();
+                            callback(HttpResponse::newHttpResponse());
+                        },
+                        userId);
                 },
                 [callback](const drogon::orm::DrogonDbException& e) {
-                    auto resp = HttpResponse::newHttpResponse();
-                    resp->setStatusCode(k500InternalServerError);
-                    callback(resp);
+                    LOG_ERROR << "Stats Error: " << e.base().what();
+                    callback(HttpResponse::newHttpResponse());
                 },
                 userId);
         },
         [callback](const drogon::orm::DrogonDbException& e) {
-            auto resp = HttpResponse::newHttpResponse();
-            resp->setStatusCode(k500InternalServerError);
-            callback(resp);
+            LOG_ERROR << "User Error: " << e.base().what();
+            callback(HttpResponse::newHttpResponse());
         },
         userId);
 }
@@ -118,12 +133,16 @@ void User::updateOne(const HttpRequestPtr& req, std::function<void(const HttpRes
         return;
     }
 
+    // 1. Pull the new phone field from the JSON request
     std::string displayName = json->get("display_name", "").asString();
     std::string dietaryPrefs = json->get("dietary_preferences", "").asString();
+    std::string phone = json->get("phone", "").asString(); // <--- ADD THIS
 
     auto dbClient = app().getDbClient();
+    
+    // 2. Update the SQL to include the phone column ($3)
     dbClient->execSqlAsync(
-        "UPDATE users SET display_name = $1, dietary_preferences = $2 WHERE id = $3",
+        "UPDATE users SET display_name = $1, dietary_preferences = $2, phone = $3 WHERE id = $4",
         [callback](const drogon::orm::Result& res) {
             Json::Value ret;
             ret["result"] = "updated";
@@ -132,12 +151,12 @@ void User::updateOne(const HttpRequestPtr& req, std::function<void(const HttpRes
             callback(resp);
         },
         [callback](const drogon::orm::DrogonDbException& e) {
-            LOG_ERROR << e.base().what();
+            LOG_ERROR << "Update Error: " << e.base().what();
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k500InternalServerError);
             callback(resp);
         },
-        displayName, dietaryPrefs, id);
+        displayName, dietaryPrefs, phone, id); // <--- PASS PHONE HERE
 }
 
 void User::deleteOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
