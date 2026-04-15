@@ -1,6 +1,10 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 # 1. Load environment variables
+=======
+# 1. Load environment variables from the shared .env
+>>>>>>> fc69b3d (Initial map integration for restaurants)
 if [ -f .env ]; then
     export $(cat .env | xargs)
 else
@@ -8,10 +12,15 @@ else
     exit 1
 fi
 
+<<<<<<< HEAD
+=======
+# 2. Setup temporary .pgpass for this session
+>>>>>>> fc69b3d (Initial map integration for restaurants)
 PGPASS_PATH="$HOME/.pgpass"
 echo "127.0.0.1:5432:$DB_NAME:$DB_USER:$DB_PASSWORD" > "$PGPASS_PATH"
 chmod 0600 "$PGPASS_PATH"
 
+<<<<<<< HEAD
 # 2. Configuration
 FILE_NAME="./dohmh_restaurant_04132026.csv"
 TABLE_NAME="restaurants"
@@ -74,3 +83,60 @@ EOF
 
 rm "$PGPASS_PATH"
 echo "Ingestion Complete. Restaurants are now deduplicated."
+=======
+# 3. File and Table Configuration
+FILE_NAME="./migrations/restaurantsnyc.csv"
+TABLE_NAME="restaurants"
+
+if [ ! -f "$FILE_NAME" ]; then
+    echo "Error: $FILE_NAME not found!"
+    rm "$PGPASS_PATH"
+    exit 1
+fi
+
+echo "Ingesting $FILE_NAME into $DB_NAME..."
+
+# 4. Execute SQL via Heredoc
+psql -h 127.0.0.1 -U "$DB_USER" -d "$DB_NAME" <<EOF
+-- Clear old data
+TRUNCATE TABLE $TABLE_NAME;
+
+-- Create staging table 
+CREATE TEMP TABLE staging (
+    url              TEXT,
+    name             TEXT,
+    rating           TEXT,
+    rating_count     TEXT,
+    detailed_ratings TEXT,
+    price_category   TEXT,
+    address          TEXT,
+    lat              TEXT,
+    lon              TEXT,
+    zip_code         TEXT
+);
+
+-- Import raw data
+\copy staging FROM '$FILE_NAME' WITH (FORMAT csv, HEADER true, QUOTE '"', ENCODING 'UTF8');
+
+-- Map and clean data into production
+INSERT INTO $TABLE_NAME (name, url, rating, rating_count, price_category, address, latitude, longitude, zip_code)
+SELECT
+    NULLIF(TRIM(name), ''),
+    NULLIF(TRIM(url), ''),
+    NULLIF(TRIM(rating), '')::double precision,
+    NULLIF(TRIM(rating_count), '')::double precision,
+    NULLIF(TRIM(price_category), '')::double precision,
+    NULLIF(TRIM(address), ''),
+    NULLIF(TRIM(lat), '')::double precision,
+    NULLIF(TRIM(lon), '')::double precision,
+    NULLIF(TRIM(zip_code), '')
+FROM staging
+WHERE NULLIF(TRIM(name), '') IS NOT NULL;
+
+EOF
+
+# 5. Cleanup
+rm "$PGPASS_PATH"
+echo "------------------------------------------"
+echo "Ingestion Successful!"
+>>>>>>> fc69b3d (Initial map integration for restaurants)
