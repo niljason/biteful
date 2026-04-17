@@ -4,13 +4,19 @@ const Restaurant = () => {
     const [result, setResult] = useState(null);
     const onSubmit = async (e) => {
         e.preventDefault(); // prevents form default submission behavior
-        const headers = {
-            "Content-Type": "multipart/form-data",
-        };
+        const menu = document.getElementById("menu");
+        const file = menu.files[0];
+        let data = new FormData();
+        data.append("data", file);
+        // no headers because stuff will break if we try to include
+        // the multipart/form-data header
+        // js/fetch api automatically includes it
+        const headers = {};
 
         const config = {
             mode: "cors", // Explicitly set CORS mode
             headers,
+            body: data,
             method: "POST",
         };
         try {
@@ -39,16 +45,17 @@ const Restaurant = () => {
         console.log(result);
     }
     return (
-        <>
-            <p>
-                The only point of this page is to ping /ocr and get a response
-                back
-            </p>
-            <form action="POST" onSubmit={onSubmit}>
-                <button type="submit">Submit</button>
-            </form>
-            <div></div>
-        </>
+        <form action="POST" onSubmit={onSubmit}>
+            <div className="input-group">
+                <label htmlFor="menu">MENU FILE</label>
+                <div className="input-wrapper">
+                    <span className="input-icon">☺︎</span>{" "}
+                    {/*need a better icon...*/}
+                    <input type="file" id="menu" required />
+                </div>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
     );
 };
 

@@ -1,8 +1,11 @@
 #include "Ocr.h"
 
 #include <drogon/HttpClient.h>
+#include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
+#include <drogon/MultiPart.h>
 #include <json/reader.h>
+#include <trantor/utils/Logger.h>
 
 #include <fstream>
 
@@ -17,6 +20,14 @@ void Ocr::upload(const HttpRequestPtr& req, std::function<void(const HttpRespons
     // finally the client verifies the info and then hits this endpoint to upload
     // the menu
     //
+
+    MultiPartParser fileParser;
+    fileParser.parse(req);
+    if (fileParser.getFiles().empty()) {
+        callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_APPLICATION_JSON));
+        LOG_ERROR << "no file found";
+        return;
+    }
 
     if (FAKING) {
         Json::Reader reader;
