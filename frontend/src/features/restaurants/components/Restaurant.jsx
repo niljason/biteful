@@ -6,6 +6,10 @@ const Restaurant = () => {
         e.preventDefault(); // prevents form default submission behavior
         const menu = document.getElementById("menu");
         const file = menu.files[0];
+        if (file.size > 5 * 1000000) {
+            // 5 megabytes, but a little smaller
+            throw new Error("File too large");
+        }
         let data = new FormData();
         data.append("data", file);
         // no headers because stuff will break if we try to include
@@ -43,6 +47,8 @@ const Restaurant = () => {
     if (result) {
         console.log("result is");
         console.log(result);
+    } else {
+        console.log("no result");
     }
     return (
         <form action="POST" onSubmit={onSubmit}>
