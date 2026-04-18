@@ -8,6 +8,7 @@ import LoginForm from "./features/auth/components/LoginForm";
 import SignupForm from "./features/users/components/SignupForm";
 import Dashboard from "./features/users/components/Dashboard";
 import PantryExplorer from "./features/pantries/components/PantryExplorer";
+import Restaurant from "./features/restaurants/components/Restaurant";
 
 const isAuthenticated = () => {
     if (localStorage.getItem("sessionId") === null) {
@@ -55,6 +56,15 @@ const router = createBrowserRouter([
         element: (
             <MainLayout>
                 <PantryExplorer />
+            </MainLayout>
+        ),
+        middleware: [isAuthenticated],
+    },
+    {
+        path: "/ocr",
+        element: (
+            <MainLayout>
+                <Restaurant />
             </MainLayout>
         ),
         middleware: [isAuthenticated],
