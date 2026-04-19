@@ -13,33 +13,37 @@ using namespace drogon;
 using namespace drogon::orm;
 using namespace drogon_model::biteful;
 
-const std::string Restaurants::Cols::_id = "\"id\"";
+const std::string Restaurants::Cols::_camis = "\"camis\"";
 const std::string Restaurants::Cols::_name = "\"name\"";
-const std::string Restaurants::Cols::_url = "\"url\"";
-const std::string Restaurants::Cols::_rating = "\"rating\"";
-const std::string Restaurants::Cols::_rating_count = "\"rating_count\"";
-const std::string Restaurants::Cols::_detailed_ratings = "\"detailed_ratings\"";
-const std::string Restaurants::Cols::_price_category = "\"price_category\"";
-const std::string Restaurants::Cols::_address = "\"address\"";
+const std::string Restaurants::Cols::_boro = "\"boro\"";
+const std::string Restaurants::Cols::_building = "\"building\"";
+const std::string Restaurants::Cols::_street = "\"street\"";
+const std::string Restaurants::Cols::_zipcode = "\"zipcode\"";
+const std::string Restaurants::Cols::_phone = "\"phone\"";
+const std::string Restaurants::Cols::_cuisine = "\"cuisine\"";
+const std::string Restaurants::Cols::_inspection_date = "\"inspection_date\"";
+const std::string Restaurants::Cols::_grade = "\"grade\"";
 const std::string Restaurants::Cols::_latitude = "\"latitude\"";
 const std::string Restaurants::Cols::_longitude = "\"longitude\"";
-const std::string Restaurants::Cols::_zip_code = "\"zip_code\"";
-const std::string Restaurants::primaryKeyName = "id";
+const std::string Restaurants::Cols::_last_updated = "\"last_updated\"";
+const std::string Restaurants::primaryKeyName = "camis";
 const bool Restaurants::hasPrimaryKey = true;
 const std::string Restaurants::tableName = "\"restaurants\"";
 
 const std::vector<typename Restaurants::MetaData> Restaurants::metaData_={
-{"id","int32_t","integer",4,1,1,1},
-{"name","std::string","text",0,0,0,1},
-{"url","std::string","text",0,0,0,0},
-{"rating","double","double precision",8,0,0,0},
-{"rating_count","double","double precision",8,0,0,0},
-{"detailed_ratings","std::string","text",0,0,0,0},
-{"price_category","double","double precision",8,0,0,0},
-{"address","std::string","text",0,0,0,0},
+{"camis","int32_t","integer",4,0,1,1},
+{"name","std::string","text",0,0,0,0},
+{"boro","std::string","text",0,0,0,0},
+{"building","std::string","text",0,0,0,0},
+{"street","std::string","text",0,0,0,0},
+{"zipcode","std::string","text",0,0,0,0},
+{"phone","std::string","text",0,0,0,0},
+{"cuisine","std::string","text",0,0,0,0},
+{"inspection_date","::trantor::Date","date",0,0,0,0},
+{"grade","std::string","text",0,0,0,0},
 {"latitude","double","double precision",8,0,0,0},
 {"longitude","double","double precision",8,0,0,0},
-{"zip_code","std::string","text",0,0,0,0}
+{"last_updated","::trantor::Date","timestamp without time zone",0,0,0,0}
 };
 const std::string &Restaurants::getColumnName(size_t index) noexcept(false)
 {
@@ -50,37 +54,50 @@ Restaurants::Restaurants(const Row &r, const ssize_t indexOffset) noexcept
 {
     if(indexOffset < 0)
     {
-        if(!r["id"].isNull())
+        if(!r["camis"].isNull())
         {
-            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
+            camis_=std::make_shared<int32_t>(r["camis"].as<int32_t>());
         }
         if(!r["name"].isNull())
         {
             name_=std::make_shared<std::string>(r["name"].as<std::string>());
         }
-        if(!r["url"].isNull())
+        if(!r["boro"].isNull())
         {
-            url_=std::make_shared<std::string>(r["url"].as<std::string>());
+            boro_=std::make_shared<std::string>(r["boro"].as<std::string>());
         }
-        if(!r["rating"].isNull())
+        if(!r["building"].isNull())
         {
-            rating_=std::make_shared<double>(r["rating"].as<double>());
+            building_=std::make_shared<std::string>(r["building"].as<std::string>());
         }
-        if(!r["rating_count"].isNull())
+        if(!r["street"].isNull())
         {
-            ratingCount_=std::make_shared<double>(r["rating_count"].as<double>());
+            street_=std::make_shared<std::string>(r["street"].as<std::string>());
         }
-        if(!r["detailed_ratings"].isNull())
+        if(!r["zipcode"].isNull())
         {
-            detailedRatings_=std::make_shared<std::string>(r["detailed_ratings"].as<std::string>());
+            zipcode_=std::make_shared<std::string>(r["zipcode"].as<std::string>());
         }
-        if(!r["price_category"].isNull())
+        if(!r["phone"].isNull())
         {
-            priceCategory_=std::make_shared<double>(r["price_category"].as<double>());
+            phone_=std::make_shared<std::string>(r["phone"].as<std::string>());
         }
-        if(!r["address"].isNull())
+        if(!r["cuisine"].isNull())
         {
-            address_=std::make_shared<std::string>(r["address"].as<std::string>());
+            cuisine_=std::make_shared<std::string>(r["cuisine"].as<std::string>());
+        }
+        if(!r["inspection_date"].isNull())
+        {
+            auto daysStr = r["inspection_date"].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            time_t t = mktime(&stm);
+            inspectionDate_=std::make_shared<::trantor::Date>(t*1000000);
+        }
+        if(!r["grade"].isNull())
+        {
+            grade_=std::make_shared<std::string>(r["grade"].as<std::string>());
         }
         if(!r["latitude"].isNull())
         {
@@ -90,15 +107,33 @@ Restaurants::Restaurants(const Row &r, const ssize_t indexOffset) noexcept
         {
             longitude_=std::make_shared<double>(r["longitude"].as<double>());
         }
-        if(!r["zip_code"].isNull())
+        if(!r["last_updated"].isNull())
         {
-            zipCode_=std::make_shared<std::string>(r["zip_code"].as<std::string>());
+            auto timeStr = r["last_updated"].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                lastUpdated_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 11 > r.size())
+        if(offset + 13 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -107,7 +142,7 @@ Restaurants::Restaurants(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
+            camis_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -117,47 +152,80 @@ Restaurants::Restaurants(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 2;
         if(!r[index].isNull())
         {
-            url_=std::make_shared<std::string>(r[index].as<std::string>());
+            boro_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
         if(!r[index].isNull())
         {
-            rating_=std::make_shared<double>(r[index].as<double>());
+            building_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 4;
         if(!r[index].isNull())
         {
-            ratingCount_=std::make_shared<double>(r[index].as<double>());
+            street_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 5;
         if(!r[index].isNull())
         {
-            detailedRatings_=std::make_shared<std::string>(r[index].as<std::string>());
+            zipcode_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 6;
         if(!r[index].isNull())
         {
-            priceCategory_=std::make_shared<double>(r[index].as<double>());
+            phone_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 7;
         if(!r[index].isNull())
         {
-            address_=std::make_shared<std::string>(r[index].as<std::string>());
+            cuisine_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 8;
         if(!r[index].isNull())
         {
-            latitude_=std::make_shared<double>(r[index].as<double>());
+            auto daysStr = r[index].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            time_t t = mktime(&stm);
+            inspectionDate_=std::make_shared<::trantor::Date>(t*1000000);
         }
         index = offset + 9;
         if(!r[index].isNull())
         {
-            longitude_=std::make_shared<double>(r[index].as<double>());
+            grade_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 10;
         if(!r[index].isNull())
         {
-            zipCode_=std::make_shared<std::string>(r[index].as<std::string>());
+            latitude_=std::make_shared<double>(r[index].as<double>());
+        }
+        index = offset + 11;
+        if(!r[index].isNull())
+        {
+            longitude_=std::make_shared<double>(r[index].as<double>());
+        }
+        index = offset + 12;
+        if(!r[index].isNull())
+        {
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                lastUpdated_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 
@@ -165,7 +233,7 @@ Restaurants::Restaurants(const Row &r, const ssize_t indexOffset) noexcept
 
 Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 11)
+    if(pMasqueradingVector.size() != 13)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -175,7 +243,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            camis_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -191,7 +259,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            url_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            boro_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -199,7 +267,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            rating_=std::make_shared<double>(pJson[pMasqueradingVector[3]].asDouble());
+            building_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -207,7 +275,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            ratingCount_=std::make_shared<double>(pJson[pMasqueradingVector[4]].asDouble());
+            street_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
@@ -215,7 +283,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            detailedRatings_=std::make_shared<std::string>(pJson[pMasqueradingVector[5]].asString());
+            zipcode_=std::make_shared<std::string>(pJson[pMasqueradingVector[5]].asString());
         }
     }
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
@@ -223,7 +291,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull())
         {
-            priceCategory_=std::make_shared<double>(pJson[pMasqueradingVector[6]].asDouble());
+            phone_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
         }
     }
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
@@ -231,7 +299,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull())
         {
-            address_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+            cuisine_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
         }
     }
     if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
@@ -239,7 +307,12 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[8] = true;
         if(!pJson[pMasqueradingVector[8]].isNull())
         {
-            latitude_=std::make_shared<double>(pJson[pMasqueradingVector[8]].asDouble());
+            auto daysStr = pJson[pMasqueradingVector[8]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            time_t t = mktime(&stm);
+            inspectionDate_=std::make_shared<::trantor::Date>(t*1000000);
         }
     }
     if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
@@ -247,7 +320,7 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[9] = true;
         if(!pJson[pMasqueradingVector[9]].isNull())
         {
-            longitude_=std::make_shared<double>(pJson[pMasqueradingVector[9]].asDouble());
+            grade_=std::make_shared<std::string>(pJson[pMasqueradingVector[9]].asString());
         }
     }
     if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
@@ -255,19 +328,53 @@ Restaurants::Restaurants(const Json::Value &pJson, const std::vector<std::string
         dirtyFlag_[10] = true;
         if(!pJson[pMasqueradingVector[10]].isNull())
         {
-            zipCode_=std::make_shared<std::string>(pJson[pMasqueradingVector[10]].asString());
+            latitude_=std::make_shared<double>(pJson[pMasqueradingVector[10]].asDouble());
+        }
+    }
+    if(!pMasqueradingVector[11].empty() && pJson.isMember(pMasqueradingVector[11]))
+    {
+        dirtyFlag_[11] = true;
+        if(!pJson[pMasqueradingVector[11]].isNull())
+        {
+            longitude_=std::make_shared<double>(pJson[pMasqueradingVector[11]].asDouble());
+        }
+    }
+    if(!pMasqueradingVector[12].empty() && pJson.isMember(pMasqueradingVector[12]))
+    {
+        dirtyFlag_[12] = true;
+        if(!pJson[pMasqueradingVector[12]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[12]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                lastUpdated_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
 
 Restaurants::Restaurants(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("camis"))
     {
         dirtyFlag_[0]=true;
-        if(!pJson["id"].isNull())
+        if(!pJson["camis"].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
+            camis_=std::make_shared<int32_t>((int32_t)pJson["camis"].asInt64());
         }
     }
     if(pJson.isMember("name"))
@@ -278,57 +385,78 @@ Restaurants::Restaurants(const Json::Value &pJson) noexcept(false)
             name_=std::make_shared<std::string>(pJson["name"].asString());
         }
     }
-    if(pJson.isMember("url"))
+    if(pJson.isMember("boro"))
     {
         dirtyFlag_[2]=true;
-        if(!pJson["url"].isNull())
+        if(!pJson["boro"].isNull())
         {
-            url_=std::make_shared<std::string>(pJson["url"].asString());
+            boro_=std::make_shared<std::string>(pJson["boro"].asString());
         }
     }
-    if(pJson.isMember("rating"))
+    if(pJson.isMember("building"))
     {
         dirtyFlag_[3]=true;
-        if(!pJson["rating"].isNull())
+        if(!pJson["building"].isNull())
         {
-            rating_=std::make_shared<double>(pJson["rating"].asDouble());
+            building_=std::make_shared<std::string>(pJson["building"].asString());
         }
     }
-    if(pJson.isMember("rating_count"))
+    if(pJson.isMember("street"))
     {
         dirtyFlag_[4]=true;
-        if(!pJson["rating_count"].isNull())
+        if(!pJson["street"].isNull())
         {
-            ratingCount_=std::make_shared<double>(pJson["rating_count"].asDouble());
+            street_=std::make_shared<std::string>(pJson["street"].asString());
         }
     }
-    if(pJson.isMember("detailed_ratings"))
+    if(pJson.isMember("zipcode"))
     {
         dirtyFlag_[5]=true;
-        if(!pJson["detailed_ratings"].isNull())
+        if(!pJson["zipcode"].isNull())
         {
-            detailedRatings_=std::make_shared<std::string>(pJson["detailed_ratings"].asString());
+            zipcode_=std::make_shared<std::string>(pJson["zipcode"].asString());
         }
     }
-    if(pJson.isMember("price_category"))
+    if(pJson.isMember("phone"))
     {
         dirtyFlag_[6]=true;
-        if(!pJson["price_category"].isNull())
+        if(!pJson["phone"].isNull())
         {
-            priceCategory_=std::make_shared<double>(pJson["price_category"].asDouble());
+            phone_=std::make_shared<std::string>(pJson["phone"].asString());
         }
     }
-    if(pJson.isMember("address"))
+    if(pJson.isMember("cuisine"))
     {
         dirtyFlag_[7]=true;
-        if(!pJson["address"].isNull())
+        if(!pJson["cuisine"].isNull())
         {
-            address_=std::make_shared<std::string>(pJson["address"].asString());
+            cuisine_=std::make_shared<std::string>(pJson["cuisine"].asString());
+        }
+    }
+    if(pJson.isMember("inspection_date"))
+    {
+        dirtyFlag_[8]=true;
+        if(!pJson["inspection_date"].isNull())
+        {
+            auto daysStr = pJson["inspection_date"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            time_t t = mktime(&stm);
+            inspectionDate_=std::make_shared<::trantor::Date>(t*1000000);
+        }
+    }
+    if(pJson.isMember("grade"))
+    {
+        dirtyFlag_[9]=true;
+        if(!pJson["grade"].isNull())
+        {
+            grade_=std::make_shared<std::string>(pJson["grade"].asString());
         }
     }
     if(pJson.isMember("latitude"))
     {
-        dirtyFlag_[8]=true;
+        dirtyFlag_[10]=true;
         if(!pJson["latitude"].isNull())
         {
             latitude_=std::make_shared<double>(pJson["latitude"].asDouble());
@@ -336,18 +464,36 @@ Restaurants::Restaurants(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("longitude"))
     {
-        dirtyFlag_[9]=true;
+        dirtyFlag_[11]=true;
         if(!pJson["longitude"].isNull())
         {
             longitude_=std::make_shared<double>(pJson["longitude"].asDouble());
         }
     }
-    if(pJson.isMember("zip_code"))
+    if(pJson.isMember("last_updated"))
     {
-        dirtyFlag_[10]=true;
-        if(!pJson["zip_code"].isNull())
+        dirtyFlag_[12]=true;
+        if(!pJson["last_updated"].isNull())
         {
-            zipCode_=std::make_shared<std::string>(pJson["zip_code"].asString());
+            auto timeStr = pJson["last_updated"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                lastUpdated_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -355,7 +501,7 @@ Restaurants::Restaurants(const Json::Value &pJson) noexcept(false)
 void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 11)
+    if(pMasqueradingVector.size() != 13)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -364,7 +510,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
+            camis_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -380,7 +526,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            url_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            boro_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -388,7 +534,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            rating_=std::make_shared<double>(pJson[pMasqueradingVector[3]].asDouble());
+            building_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -396,7 +542,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            ratingCount_=std::make_shared<double>(pJson[pMasqueradingVector[4]].asDouble());
+            street_=std::make_shared<std::string>(pJson[pMasqueradingVector[4]].asString());
         }
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
@@ -404,7 +550,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            detailedRatings_=std::make_shared<std::string>(pJson[pMasqueradingVector[5]].asString());
+            zipcode_=std::make_shared<std::string>(pJson[pMasqueradingVector[5]].asString());
         }
     }
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
@@ -412,7 +558,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[6] = true;
         if(!pJson[pMasqueradingVector[6]].isNull())
         {
-            priceCategory_=std::make_shared<double>(pJson[pMasqueradingVector[6]].asDouble());
+            phone_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
         }
     }
     if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
@@ -420,7 +566,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[7] = true;
         if(!pJson[pMasqueradingVector[7]].isNull())
         {
-            address_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
+            cuisine_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
         }
     }
     if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
@@ -428,7 +574,12 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[8] = true;
         if(!pJson[pMasqueradingVector[8]].isNull())
         {
-            latitude_=std::make_shared<double>(pJson[pMasqueradingVector[8]].asDouble());
+            auto daysStr = pJson[pMasqueradingVector[8]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            time_t t = mktime(&stm);
+            inspectionDate_=std::make_shared<::trantor::Date>(t*1000000);
         }
     }
     if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
@@ -436,7 +587,7 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[9] = true;
         if(!pJson[pMasqueradingVector[9]].isNull())
         {
-            longitude_=std::make_shared<double>(pJson[pMasqueradingVector[9]].asDouble());
+            grade_=std::make_shared<std::string>(pJson[pMasqueradingVector[9]].asString());
         }
     }
     if(!pMasqueradingVector[10].empty() && pJson.isMember(pMasqueradingVector[10]))
@@ -444,18 +595,52 @@ void Restaurants::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[10] = true;
         if(!pJson[pMasqueradingVector[10]].isNull())
         {
-            zipCode_=std::make_shared<std::string>(pJson[pMasqueradingVector[10]].asString());
+            latitude_=std::make_shared<double>(pJson[pMasqueradingVector[10]].asDouble());
+        }
+    }
+    if(!pMasqueradingVector[11].empty() && pJson.isMember(pMasqueradingVector[11]))
+    {
+        dirtyFlag_[11] = true;
+        if(!pJson[pMasqueradingVector[11]].isNull())
+        {
+            longitude_=std::make_shared<double>(pJson[pMasqueradingVector[11]].asDouble());
+        }
+    }
+    if(!pMasqueradingVector[12].empty() && pJson.isMember(pMasqueradingVector[12]))
+    {
+        dirtyFlag_[12] = true;
+        if(!pJson[pMasqueradingVector[12]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[12]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                lastUpdated_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
 
 void Restaurants::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("camis"))
     {
-        if(!pJson["id"].isNull())
+        if(!pJson["camis"].isNull())
         {
-            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
+            camis_=std::make_shared<int32_t>((int32_t)pJson["camis"].asInt64());
         }
     }
     if(pJson.isMember("name"))
@@ -466,57 +651,78 @@ void Restaurants::updateByJson(const Json::Value &pJson) noexcept(false)
             name_=std::make_shared<std::string>(pJson["name"].asString());
         }
     }
-    if(pJson.isMember("url"))
+    if(pJson.isMember("boro"))
     {
         dirtyFlag_[2] = true;
-        if(!pJson["url"].isNull())
+        if(!pJson["boro"].isNull())
         {
-            url_=std::make_shared<std::string>(pJson["url"].asString());
+            boro_=std::make_shared<std::string>(pJson["boro"].asString());
         }
     }
-    if(pJson.isMember("rating"))
+    if(pJson.isMember("building"))
     {
         dirtyFlag_[3] = true;
-        if(!pJson["rating"].isNull())
+        if(!pJson["building"].isNull())
         {
-            rating_=std::make_shared<double>(pJson["rating"].asDouble());
+            building_=std::make_shared<std::string>(pJson["building"].asString());
         }
     }
-    if(pJson.isMember("rating_count"))
+    if(pJson.isMember("street"))
     {
         dirtyFlag_[4] = true;
-        if(!pJson["rating_count"].isNull())
+        if(!pJson["street"].isNull())
         {
-            ratingCount_=std::make_shared<double>(pJson["rating_count"].asDouble());
+            street_=std::make_shared<std::string>(pJson["street"].asString());
         }
     }
-    if(pJson.isMember("detailed_ratings"))
+    if(pJson.isMember("zipcode"))
     {
         dirtyFlag_[5] = true;
-        if(!pJson["detailed_ratings"].isNull())
+        if(!pJson["zipcode"].isNull())
         {
-            detailedRatings_=std::make_shared<std::string>(pJson["detailed_ratings"].asString());
+            zipcode_=std::make_shared<std::string>(pJson["zipcode"].asString());
         }
     }
-    if(pJson.isMember("price_category"))
+    if(pJson.isMember("phone"))
     {
         dirtyFlag_[6] = true;
-        if(!pJson["price_category"].isNull())
+        if(!pJson["phone"].isNull())
         {
-            priceCategory_=std::make_shared<double>(pJson["price_category"].asDouble());
+            phone_=std::make_shared<std::string>(pJson["phone"].asString());
         }
     }
-    if(pJson.isMember("address"))
+    if(pJson.isMember("cuisine"))
     {
         dirtyFlag_[7] = true;
-        if(!pJson["address"].isNull())
+        if(!pJson["cuisine"].isNull())
         {
-            address_=std::make_shared<std::string>(pJson["address"].asString());
+            cuisine_=std::make_shared<std::string>(pJson["cuisine"].asString());
+        }
+    }
+    if(pJson.isMember("inspection_date"))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson["inspection_date"].isNull())
+        {
+            auto daysStr = pJson["inspection_date"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            strptime(daysStr.c_str(),"%Y-%m-%d",&stm);
+            time_t t = mktime(&stm);
+            inspectionDate_=std::make_shared<::trantor::Date>(t*1000000);
+        }
+    }
+    if(pJson.isMember("grade"))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson["grade"].isNull())
+        {
+            grade_=std::make_shared<std::string>(pJson["grade"].asString());
         }
     }
     if(pJson.isMember("latitude"))
     {
-        dirtyFlag_[8] = true;
+        dirtyFlag_[10] = true;
         if(!pJson["latitude"].isNull())
         {
             latitude_=std::make_shared<double>(pJson["latitude"].asDouble());
@@ -524,42 +730,60 @@ void Restaurants::updateByJson(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("longitude"))
     {
-        dirtyFlag_[9] = true;
+        dirtyFlag_[11] = true;
         if(!pJson["longitude"].isNull())
         {
             longitude_=std::make_shared<double>(pJson["longitude"].asDouble());
         }
     }
-    if(pJson.isMember("zip_code"))
+    if(pJson.isMember("last_updated"))
     {
-        dirtyFlag_[10] = true;
-        if(!pJson["zip_code"].isNull())
+        dirtyFlag_[12] = true;
+        if(!pJson["last_updated"].isNull())
         {
-            zipCode_=std::make_shared<std::string>(pJson["zip_code"].asString());
+            auto timeStr = pJson["last_updated"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                lastUpdated_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
 
-const int32_t &Restaurants::getValueOfId() const noexcept
+const int32_t &Restaurants::getValueOfCamis() const noexcept
 {
     static const int32_t defaultValue = int32_t();
-    if(id_)
-        return *id_;
+    if(camis_)
+        return *camis_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t> &Restaurants::getId() const noexcept
+const std::shared_ptr<int32_t> &Restaurants::getCamis() const noexcept
 {
-    return id_;
+    return camis_;
 }
-void Restaurants::setId(const int32_t &pId) noexcept
+void Restaurants::setCamis(const int32_t &pCamis) noexcept
 {
-    id_ = std::make_shared<int32_t>(pId);
+    camis_ = std::make_shared<int32_t>(pCamis);
     dirtyFlag_[0] = true;
 }
 const typename Restaurants::PrimaryKeyType & Restaurants::getPrimaryKey() const
 {
-    assert(id_);
-    return *id_;
+    assert(camis_);
+    return *camis_;
 }
 
 const std::string &Restaurants::getValueOfName() const noexcept
@@ -583,152 +807,221 @@ void Restaurants::setName(std::string &&pName) noexcept
     name_ = std::make_shared<std::string>(std::move(pName));
     dirtyFlag_[1] = true;
 }
+void Restaurants::setNameToNull() noexcept
+{
+    name_.reset();
+    dirtyFlag_[1] = true;
+}
 
-const std::string &Restaurants::getValueOfUrl() const noexcept
+const std::string &Restaurants::getValueOfBoro() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(url_)
-        return *url_;
+    if(boro_)
+        return *boro_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Restaurants::getUrl() const noexcept
+const std::shared_ptr<std::string> &Restaurants::getBoro() const noexcept
 {
-    return url_;
+    return boro_;
 }
-void Restaurants::setUrl(const std::string &pUrl) noexcept
+void Restaurants::setBoro(const std::string &pBoro) noexcept
 {
-    url_ = std::make_shared<std::string>(pUrl);
+    boro_ = std::make_shared<std::string>(pBoro);
     dirtyFlag_[2] = true;
 }
-void Restaurants::setUrl(std::string &&pUrl) noexcept
+void Restaurants::setBoro(std::string &&pBoro) noexcept
 {
-    url_ = std::make_shared<std::string>(std::move(pUrl));
+    boro_ = std::make_shared<std::string>(std::move(pBoro));
     dirtyFlag_[2] = true;
 }
-void Restaurants::setUrlToNull() noexcept
+void Restaurants::setBoroToNull() noexcept
 {
-    url_.reset();
+    boro_.reset();
     dirtyFlag_[2] = true;
 }
 
-const double &Restaurants::getValueOfRating() const noexcept
+const std::string &Restaurants::getValueOfBuilding() const noexcept
 {
-    static const double defaultValue = double();
-    if(rating_)
-        return *rating_;
+    static const std::string defaultValue = std::string();
+    if(building_)
+        return *building_;
     return defaultValue;
 }
-const std::shared_ptr<double> &Restaurants::getRating() const noexcept
+const std::shared_ptr<std::string> &Restaurants::getBuilding() const noexcept
 {
-    return rating_;
+    return building_;
 }
-void Restaurants::setRating(const double &pRating) noexcept
+void Restaurants::setBuilding(const std::string &pBuilding) noexcept
 {
-    rating_ = std::make_shared<double>(pRating);
+    building_ = std::make_shared<std::string>(pBuilding);
     dirtyFlag_[3] = true;
 }
-void Restaurants::setRatingToNull() noexcept
+void Restaurants::setBuilding(std::string &&pBuilding) noexcept
 {
-    rating_.reset();
+    building_ = std::make_shared<std::string>(std::move(pBuilding));
+    dirtyFlag_[3] = true;
+}
+void Restaurants::setBuildingToNull() noexcept
+{
+    building_.reset();
     dirtyFlag_[3] = true;
 }
 
-const double &Restaurants::getValueOfRatingCount() const noexcept
-{
-    static const double defaultValue = double();
-    if(ratingCount_)
-        return *ratingCount_;
-    return defaultValue;
-}
-const std::shared_ptr<double> &Restaurants::getRatingCount() const noexcept
-{
-    return ratingCount_;
-}
-void Restaurants::setRatingCount(const double &pRatingCount) noexcept
-{
-    ratingCount_ = std::make_shared<double>(pRatingCount);
-    dirtyFlag_[4] = true;
-}
-void Restaurants::setRatingCountToNull() noexcept
-{
-    ratingCount_.reset();
-    dirtyFlag_[4] = true;
-}
-
-const std::string &Restaurants::getValueOfDetailedRatings() const noexcept
+const std::string &Restaurants::getValueOfStreet() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(detailedRatings_)
-        return *detailedRatings_;
+    if(street_)
+        return *street_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Restaurants::getDetailedRatings() const noexcept
+const std::shared_ptr<std::string> &Restaurants::getStreet() const noexcept
 {
-    return detailedRatings_;
+    return street_;
 }
-void Restaurants::setDetailedRatings(const std::string &pDetailedRatings) noexcept
+void Restaurants::setStreet(const std::string &pStreet) noexcept
 {
-    detailedRatings_ = std::make_shared<std::string>(pDetailedRatings);
-    dirtyFlag_[5] = true;
+    street_ = std::make_shared<std::string>(pStreet);
+    dirtyFlag_[4] = true;
 }
-void Restaurants::setDetailedRatings(std::string &&pDetailedRatings) noexcept
+void Restaurants::setStreet(std::string &&pStreet) noexcept
 {
-    detailedRatings_ = std::make_shared<std::string>(std::move(pDetailedRatings));
-    dirtyFlag_[5] = true;
+    street_ = std::make_shared<std::string>(std::move(pStreet));
+    dirtyFlag_[4] = true;
 }
-void Restaurants::setDetailedRatingsToNull() noexcept
+void Restaurants::setStreetToNull() noexcept
 {
-    detailedRatings_.reset();
-    dirtyFlag_[5] = true;
-}
-
-const double &Restaurants::getValueOfPriceCategory() const noexcept
-{
-    static const double defaultValue = double();
-    if(priceCategory_)
-        return *priceCategory_;
-    return defaultValue;
-}
-const std::shared_ptr<double> &Restaurants::getPriceCategory() const noexcept
-{
-    return priceCategory_;
-}
-void Restaurants::setPriceCategory(const double &pPriceCategory) noexcept
-{
-    priceCategory_ = std::make_shared<double>(pPriceCategory);
-    dirtyFlag_[6] = true;
-}
-void Restaurants::setPriceCategoryToNull() noexcept
-{
-    priceCategory_.reset();
-    dirtyFlag_[6] = true;
+    street_.reset();
+    dirtyFlag_[4] = true;
 }
 
-const std::string &Restaurants::getValueOfAddress() const noexcept
+const std::string &Restaurants::getValueOfZipcode() const noexcept
 {
     static const std::string defaultValue = std::string();
-    if(address_)
-        return *address_;
+    if(zipcode_)
+        return *zipcode_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Restaurants::getAddress() const noexcept
+const std::shared_ptr<std::string> &Restaurants::getZipcode() const noexcept
 {
-    return address_;
+    return zipcode_;
 }
-void Restaurants::setAddress(const std::string &pAddress) noexcept
+void Restaurants::setZipcode(const std::string &pZipcode) noexcept
 {
-    address_ = std::make_shared<std::string>(pAddress);
+    zipcode_ = std::make_shared<std::string>(pZipcode);
+    dirtyFlag_[5] = true;
+}
+void Restaurants::setZipcode(std::string &&pZipcode) noexcept
+{
+    zipcode_ = std::make_shared<std::string>(std::move(pZipcode));
+    dirtyFlag_[5] = true;
+}
+void Restaurants::setZipcodeToNull() noexcept
+{
+    zipcode_.reset();
+    dirtyFlag_[5] = true;
+}
+
+const std::string &Restaurants::getValueOfPhone() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(phone_)
+        return *phone_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Restaurants::getPhone() const noexcept
+{
+    return phone_;
+}
+void Restaurants::setPhone(const std::string &pPhone) noexcept
+{
+    phone_ = std::make_shared<std::string>(pPhone);
+    dirtyFlag_[6] = true;
+}
+void Restaurants::setPhone(std::string &&pPhone) noexcept
+{
+    phone_ = std::make_shared<std::string>(std::move(pPhone));
+    dirtyFlag_[6] = true;
+}
+void Restaurants::setPhoneToNull() noexcept
+{
+    phone_.reset();
+    dirtyFlag_[6] = true;
+}
+
+const std::string &Restaurants::getValueOfCuisine() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(cuisine_)
+        return *cuisine_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Restaurants::getCuisine() const noexcept
+{
+    return cuisine_;
+}
+void Restaurants::setCuisine(const std::string &pCuisine) noexcept
+{
+    cuisine_ = std::make_shared<std::string>(pCuisine);
     dirtyFlag_[7] = true;
 }
-void Restaurants::setAddress(std::string &&pAddress) noexcept
+void Restaurants::setCuisine(std::string &&pCuisine) noexcept
 {
-    address_ = std::make_shared<std::string>(std::move(pAddress));
+    cuisine_ = std::make_shared<std::string>(std::move(pCuisine));
     dirtyFlag_[7] = true;
 }
-void Restaurants::setAddressToNull() noexcept
+void Restaurants::setCuisineToNull() noexcept
 {
-    address_.reset();
+    cuisine_.reset();
     dirtyFlag_[7] = true;
+}
+
+const ::trantor::Date &Restaurants::getValueOfInspectionDate() const noexcept
+{
+    static const ::trantor::Date defaultValue = ::trantor::Date();
+    if(inspectionDate_)
+        return *inspectionDate_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Restaurants::getInspectionDate() const noexcept
+{
+    return inspectionDate_;
+}
+void Restaurants::setInspectionDate(const ::trantor::Date &pInspectionDate) noexcept
+{
+    inspectionDate_ = std::make_shared<::trantor::Date>(pInspectionDate.roundDay());
+    dirtyFlag_[8] = true;
+}
+void Restaurants::setInspectionDateToNull() noexcept
+{
+    inspectionDate_.reset();
+    dirtyFlag_[8] = true;
+}
+
+const std::string &Restaurants::getValueOfGrade() const noexcept
+{
+    static const std::string defaultValue = std::string();
+    if(grade_)
+        return *grade_;
+    return defaultValue;
+}
+const std::shared_ptr<std::string> &Restaurants::getGrade() const noexcept
+{
+    return grade_;
+}
+void Restaurants::setGrade(const std::string &pGrade) noexcept
+{
+    grade_ = std::make_shared<std::string>(pGrade);
+    dirtyFlag_[9] = true;
+}
+void Restaurants::setGrade(std::string &&pGrade) noexcept
+{
+    grade_ = std::make_shared<std::string>(std::move(pGrade));
+    dirtyFlag_[9] = true;
+}
+void Restaurants::setGradeToNull() noexcept
+{
+    grade_.reset();
+    dirtyFlag_[9] = true;
 }
 
 const double &Restaurants::getValueOfLatitude() const noexcept
@@ -745,12 +1038,12 @@ const std::shared_ptr<double> &Restaurants::getLatitude() const noexcept
 void Restaurants::setLatitude(const double &pLatitude) noexcept
 {
     latitude_ = std::make_shared<double>(pLatitude);
-    dirtyFlag_[8] = true;
+    dirtyFlag_[10] = true;
 }
 void Restaurants::setLatitudeToNull() noexcept
 {
     latitude_.reset();
-    dirtyFlag_[8] = true;
+    dirtyFlag_[10] = true;
 }
 
 const double &Restaurants::getValueOfLongitude() const noexcept
@@ -767,39 +1060,34 @@ const std::shared_ptr<double> &Restaurants::getLongitude() const noexcept
 void Restaurants::setLongitude(const double &pLongitude) noexcept
 {
     longitude_ = std::make_shared<double>(pLongitude);
-    dirtyFlag_[9] = true;
+    dirtyFlag_[11] = true;
 }
 void Restaurants::setLongitudeToNull() noexcept
 {
     longitude_.reset();
-    dirtyFlag_[9] = true;
+    dirtyFlag_[11] = true;
 }
 
-const std::string &Restaurants::getValueOfZipCode() const noexcept
+const ::trantor::Date &Restaurants::getValueOfLastUpdated() const noexcept
 {
-    static const std::string defaultValue = std::string();
-    if(zipCode_)
-        return *zipCode_;
+    static const ::trantor::Date defaultValue = ::trantor::Date();
+    if(lastUpdated_)
+        return *lastUpdated_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Restaurants::getZipCode() const noexcept
+const std::shared_ptr<::trantor::Date> &Restaurants::getLastUpdated() const noexcept
 {
-    return zipCode_;
+    return lastUpdated_;
 }
-void Restaurants::setZipCode(const std::string &pZipCode) noexcept
+void Restaurants::setLastUpdated(const ::trantor::Date &pLastUpdated) noexcept
 {
-    zipCode_ = std::make_shared<std::string>(pZipCode);
-    dirtyFlag_[10] = true;
+    lastUpdated_ = std::make_shared<::trantor::Date>(pLastUpdated);
+    dirtyFlag_[12] = true;
 }
-void Restaurants::setZipCode(std::string &&pZipCode) noexcept
+void Restaurants::setLastUpdatedToNull() noexcept
 {
-    zipCode_ = std::make_shared<std::string>(std::move(pZipCode));
-    dirtyFlag_[10] = true;
-}
-void Restaurants::setZipCodeToNull() noexcept
-{
-    zipCode_.reset();
-    dirtyFlag_[10] = true;
+    lastUpdated_.reset();
+    dirtyFlag_[12] = true;
 }
 
 void Restaurants::updateId(const uint64_t id)
@@ -809,22 +1097,36 @@ void Restaurants::updateId(const uint64_t id)
 const std::vector<std::string> &Restaurants::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
+        "camis",
         "name",
-        "url",
-        "rating",
-        "rating_count",
-        "detailed_ratings",
-        "price_category",
-        "address",
+        "boro",
+        "building",
+        "street",
+        "zipcode",
+        "phone",
+        "cuisine",
+        "inspection_date",
+        "grade",
         "latitude",
         "longitude",
-        "zip_code"
+        "last_updated"
     };
     return inCols;
 }
 
 void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
+    if(dirtyFlag_[0])
+    {
+        if(getCamis())
+        {
+            binder << getValueOfCamis();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
     if(dirtyFlag_[1])
     {
         if(getName())
@@ -838,9 +1140,9 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getUrl())
+        if(getBoro())
         {
-            binder << getValueOfUrl();
+            binder << getValueOfBoro();
         }
         else
         {
@@ -849,9 +1151,9 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[3])
     {
-        if(getRating())
+        if(getBuilding())
         {
-            binder << getValueOfRating();
+            binder << getValueOfBuilding();
         }
         else
         {
@@ -860,9 +1162,9 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[4])
     {
-        if(getRatingCount())
+        if(getStreet())
         {
-            binder << getValueOfRatingCount();
+            binder << getValueOfStreet();
         }
         else
         {
@@ -871,9 +1173,9 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[5])
     {
-        if(getDetailedRatings())
+        if(getZipcode())
         {
-            binder << getValueOfDetailedRatings();
+            binder << getValueOfZipcode();
         }
         else
         {
@@ -882,9 +1184,9 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
-        if(getPriceCategory())
+        if(getPhone())
         {
-            binder << getValueOfPriceCategory();
+            binder << getValueOfPhone();
         }
         else
         {
@@ -893,9 +1195,9 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[7])
     {
-        if(getAddress())
+        if(getCuisine())
         {
-            binder << getValueOfAddress();
+            binder << getValueOfCuisine();
         }
         else
         {
@@ -903,6 +1205,28 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
         }
     }
     if(dirtyFlag_[8])
+    {
+        if(getInspectionDate())
+        {
+            binder << getValueOfInspectionDate();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[9])
+    {
+        if(getGrade())
+        {
+            binder << getValueOfGrade();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[10])
     {
         if(getLatitude())
         {
@@ -913,7 +1237,7 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[9])
+    if(dirtyFlag_[11])
     {
         if(getLongitude())
         {
@@ -924,11 +1248,11 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[10])
+    if(dirtyFlag_[12])
     {
-        if(getZipCode())
+        if(getLastUpdated())
         {
-            binder << getValueOfZipCode();
+            binder << getValueOfLastUpdated();
         }
         else
         {
@@ -940,6 +1264,10 @@ void Restaurants::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 const std::vector<std::string> Restaurants::updateColumns() const
 {
     std::vector<std::string> ret;
+    if(dirtyFlag_[0])
+    {
+        ret.push_back(getColumnName(0));
+    }
     if(dirtyFlag_[1])
     {
         ret.push_back(getColumnName(1));
@@ -980,11 +1308,30 @@ const std::vector<std::string> Restaurants::updateColumns() const
     {
         ret.push_back(getColumnName(10));
     }
+    if(dirtyFlag_[11])
+    {
+        ret.push_back(getColumnName(11));
+    }
+    if(dirtyFlag_[12])
+    {
+        ret.push_back(getColumnName(12));
+    }
     return ret;
 }
 
 void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
+    if(dirtyFlag_[0])
+    {
+        if(getCamis())
+        {
+            binder << getValueOfCamis();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
     if(dirtyFlag_[1])
     {
         if(getName())
@@ -998,9 +1345,9 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getUrl())
+        if(getBoro())
         {
-            binder << getValueOfUrl();
+            binder << getValueOfBoro();
         }
         else
         {
@@ -1009,9 +1356,9 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[3])
     {
-        if(getRating())
+        if(getBuilding())
         {
-            binder << getValueOfRating();
+            binder << getValueOfBuilding();
         }
         else
         {
@@ -1020,9 +1367,9 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[4])
     {
-        if(getRatingCount())
+        if(getStreet())
         {
-            binder << getValueOfRatingCount();
+            binder << getValueOfStreet();
         }
         else
         {
@@ -1031,9 +1378,9 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[5])
     {
-        if(getDetailedRatings())
+        if(getZipcode())
         {
-            binder << getValueOfDetailedRatings();
+            binder << getValueOfZipcode();
         }
         else
         {
@@ -1042,9 +1389,9 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
-        if(getPriceCategory())
+        if(getPhone())
         {
-            binder << getValueOfPriceCategory();
+            binder << getValueOfPhone();
         }
         else
         {
@@ -1053,9 +1400,9 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[7])
     {
-        if(getAddress())
+        if(getCuisine())
         {
-            binder << getValueOfAddress();
+            binder << getValueOfCuisine();
         }
         else
         {
@@ -1063,6 +1410,28 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
         }
     }
     if(dirtyFlag_[8])
+    {
+        if(getInspectionDate())
+        {
+            binder << getValueOfInspectionDate();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[9])
+    {
+        if(getGrade())
+        {
+            binder << getValueOfGrade();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[10])
     {
         if(getLatitude())
         {
@@ -1073,7 +1442,7 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[9])
+    if(dirtyFlag_[11])
     {
         if(getLongitude())
         {
@@ -1084,11 +1453,11 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[10])
+    if(dirtyFlag_[12])
     {
-        if(getZipCode())
+        if(getLastUpdated())
         {
-            binder << getValueOfZipCode();
+            binder << getValueOfLastUpdated();
         }
         else
         {
@@ -1099,13 +1468,13 @@ void Restaurants::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 Json::Value Restaurants::toJson() const
 {
     Json::Value ret;
-    if(getId())
+    if(getCamis())
     {
-        ret["id"]=getValueOfId();
+        ret["camis"]=getValueOfCamis();
     }
     else
     {
-        ret["id"]=Json::Value();
+        ret["camis"]=Json::Value();
     }
     if(getName())
     {
@@ -1115,53 +1484,69 @@ Json::Value Restaurants::toJson() const
     {
         ret["name"]=Json::Value();
     }
-    if(getUrl())
+    if(getBoro())
     {
-        ret["url"]=getValueOfUrl();
+        ret["boro"]=getValueOfBoro();
     }
     else
     {
-        ret["url"]=Json::Value();
+        ret["boro"]=Json::Value();
     }
-    if(getRating())
+    if(getBuilding())
     {
-        ret["rating"]=getValueOfRating();
-    }
-    else
-    {
-        ret["rating"]=Json::Value();
-    }
-    if(getRatingCount())
-    {
-        ret["rating_count"]=getValueOfRatingCount();
+        ret["building"]=getValueOfBuilding();
     }
     else
     {
-        ret["rating_count"]=Json::Value();
+        ret["building"]=Json::Value();
     }
-    if(getDetailedRatings())
+    if(getStreet())
     {
-        ret["detailed_ratings"]=getValueOfDetailedRatings();
-    }
-    else
-    {
-        ret["detailed_ratings"]=Json::Value();
-    }
-    if(getPriceCategory())
-    {
-        ret["price_category"]=getValueOfPriceCategory();
+        ret["street"]=getValueOfStreet();
     }
     else
     {
-        ret["price_category"]=Json::Value();
+        ret["street"]=Json::Value();
     }
-    if(getAddress())
+    if(getZipcode())
     {
-        ret["address"]=getValueOfAddress();
+        ret["zipcode"]=getValueOfZipcode();
     }
     else
     {
-        ret["address"]=Json::Value();
+        ret["zipcode"]=Json::Value();
+    }
+    if(getPhone())
+    {
+        ret["phone"]=getValueOfPhone();
+    }
+    else
+    {
+        ret["phone"]=Json::Value();
+    }
+    if(getCuisine())
+    {
+        ret["cuisine"]=getValueOfCuisine();
+    }
+    else
+    {
+        ret["cuisine"]=Json::Value();
+    }
+    if(getInspectionDate())
+    {
+        ret["inspection_date"]=getInspectionDate()->toDbStringLocal();
+    }
+    else
+    {
+        ret["inspection_date"]=Json::Value();
+    }
+    if(getGrade())
+    {
+        ret["grade"]=getValueOfGrade();
+    }
+    else
+    {
+        ret["grade"]=Json::Value();
     }
     if(getLatitude())
     {
@@ -1179,13 +1564,13 @@ Json::Value Restaurants::toJson() const
     {
         ret["longitude"]=Json::Value();
     }
-    if(getZipCode())
+    if(getLastUpdated())
     {
-        ret["zip_code"]=getValueOfZipCode();
+        ret["last_updated"]=getLastUpdated()->toDbStringLocal();
     }
     else
     {
-        ret["zip_code"]=Json::Value();
+        ret["last_updated"]=Json::Value();
     }
     return ret;
 }
@@ -1199,13 +1584,13 @@ Json::Value Restaurants::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 11)
+    if(pMasqueradingVector.size() == 13)
     {
         if(!pMasqueradingVector[0].empty())
         {
-            if(getId())
+            if(getCamis())
             {
-                ret[pMasqueradingVector[0]]=getValueOfId();
+                ret[pMasqueradingVector[0]]=getValueOfCamis();
             }
             else
             {
@@ -1225,9 +1610,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty())
         {
-            if(getUrl())
+            if(getBoro())
             {
-                ret[pMasqueradingVector[2]]=getValueOfUrl();
+                ret[pMasqueradingVector[2]]=getValueOfBoro();
             }
             else
             {
@@ -1236,9 +1621,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[3].empty())
         {
-            if(getRating())
+            if(getBuilding())
             {
-                ret[pMasqueradingVector[3]]=getValueOfRating();
+                ret[pMasqueradingVector[3]]=getValueOfBuilding();
             }
             else
             {
@@ -1247,9 +1632,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[4].empty())
         {
-            if(getRatingCount())
+            if(getStreet())
             {
-                ret[pMasqueradingVector[4]]=getValueOfRatingCount();
+                ret[pMasqueradingVector[4]]=getValueOfStreet();
             }
             else
             {
@@ -1258,9 +1643,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[5].empty())
         {
-            if(getDetailedRatings())
+            if(getZipcode())
             {
-                ret[pMasqueradingVector[5]]=getValueOfDetailedRatings();
+                ret[pMasqueradingVector[5]]=getValueOfZipcode();
             }
             else
             {
@@ -1269,9 +1654,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[6].empty())
         {
-            if(getPriceCategory())
+            if(getPhone())
             {
-                ret[pMasqueradingVector[6]]=getValueOfPriceCategory();
+                ret[pMasqueradingVector[6]]=getValueOfPhone();
             }
             else
             {
@@ -1280,9 +1665,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[7].empty())
         {
-            if(getAddress())
+            if(getCuisine())
             {
-                ret[pMasqueradingVector[7]]=getValueOfAddress();
+                ret[pMasqueradingVector[7]]=getValueOfCuisine();
             }
             else
             {
@@ -1291,9 +1676,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[8].empty())
         {
-            if(getLatitude())
+            if(getInspectionDate())
             {
-                ret[pMasqueradingVector[8]]=getValueOfLatitude();
+                ret[pMasqueradingVector[8]]=getInspectionDate()->toDbStringLocal();
             }
             else
             {
@@ -1302,9 +1687,9 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[9].empty())
         {
-            if(getLongitude())
+            if(getGrade())
             {
-                ret[pMasqueradingVector[9]]=getValueOfLongitude();
+                ret[pMasqueradingVector[9]]=getValueOfGrade();
             }
             else
             {
@@ -1313,25 +1698,47 @@ Json::Value Restaurants::toMasqueradedJson(
         }
         if(!pMasqueradingVector[10].empty())
         {
-            if(getZipCode())
+            if(getLatitude())
             {
-                ret[pMasqueradingVector[10]]=getValueOfZipCode();
+                ret[pMasqueradingVector[10]]=getValueOfLatitude();
             }
             else
             {
                 ret[pMasqueradingVector[10]]=Json::Value();
             }
         }
+        if(!pMasqueradingVector[11].empty())
+        {
+            if(getLongitude())
+            {
+                ret[pMasqueradingVector[11]]=getValueOfLongitude();
+            }
+            else
+            {
+                ret[pMasqueradingVector[11]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[12].empty())
+        {
+            if(getLastUpdated())
+            {
+                ret[pMasqueradingVector[12]]=getLastUpdated()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[12]]=Json::Value();
+            }
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if(getId())
+    if(getCamis())
     {
-        ret["id"]=getValueOfId();
+        ret["camis"]=getValueOfCamis();
     }
     else
     {
-        ret["id"]=Json::Value();
+        ret["camis"]=Json::Value();
     }
     if(getName())
     {
@@ -1341,53 +1748,69 @@ Json::Value Restaurants::toMasqueradedJson(
     {
         ret["name"]=Json::Value();
     }
-    if(getUrl())
+    if(getBoro())
     {
-        ret["url"]=getValueOfUrl();
+        ret["boro"]=getValueOfBoro();
     }
     else
     {
-        ret["url"]=Json::Value();
+        ret["boro"]=Json::Value();
     }
-    if(getRating())
+    if(getBuilding())
     {
-        ret["rating"]=getValueOfRating();
-    }
-    else
-    {
-        ret["rating"]=Json::Value();
-    }
-    if(getRatingCount())
-    {
-        ret["rating_count"]=getValueOfRatingCount();
+        ret["building"]=getValueOfBuilding();
     }
     else
     {
-        ret["rating_count"]=Json::Value();
+        ret["building"]=Json::Value();
     }
-    if(getDetailedRatings())
+    if(getStreet())
     {
-        ret["detailed_ratings"]=getValueOfDetailedRatings();
-    }
-    else
-    {
-        ret["detailed_ratings"]=Json::Value();
-    }
-    if(getPriceCategory())
-    {
-        ret["price_category"]=getValueOfPriceCategory();
+        ret["street"]=getValueOfStreet();
     }
     else
     {
-        ret["price_category"]=Json::Value();
+        ret["street"]=Json::Value();
     }
-    if(getAddress())
+    if(getZipcode())
     {
-        ret["address"]=getValueOfAddress();
+        ret["zipcode"]=getValueOfZipcode();
     }
     else
     {
-        ret["address"]=Json::Value();
+        ret["zipcode"]=Json::Value();
+    }
+    if(getPhone())
+    {
+        ret["phone"]=getValueOfPhone();
+    }
+    else
+    {
+        ret["phone"]=Json::Value();
+    }
+    if(getCuisine())
+    {
+        ret["cuisine"]=getValueOfCuisine();
+    }
+    else
+    {
+        ret["cuisine"]=Json::Value();
+    }
+    if(getInspectionDate())
+    {
+        ret["inspection_date"]=getInspectionDate()->toDbStringLocal();
+    }
+    else
+    {
+        ret["inspection_date"]=Json::Value();
+    }
+    if(getGrade())
+    {
+        ret["grade"]=getValueOfGrade();
+    }
+    else
+    {
+        ret["grade"]=Json::Value();
     }
     if(getLatitude())
     {
@@ -1405,77 +1828,87 @@ Json::Value Restaurants::toMasqueradedJson(
     {
         ret["longitude"]=Json::Value();
     }
-    if(getZipCode())
+    if(getLastUpdated())
     {
-        ret["zip_code"]=getValueOfZipCode();
+        ret["last_updated"]=getLastUpdated()->toDbStringLocal();
     }
     else
     {
-        ret["zip_code"]=Json::Value();
+        ret["last_updated"]=Json::Value();
     }
     return ret;
 }
 
 bool Restaurants::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("camis"))
     {
-        if(!validJsonOfField(0, "id", pJson["id"], err, true))
+        if(!validJsonOfField(0, "camis", pJson["camis"], err, true))
             return false;
+    }
+    else
+    {
+        err="The camis column cannot be null";
+        return false;
     }
     if(pJson.isMember("name"))
     {
         if(!validJsonOfField(1, "name", pJson["name"], err, true))
             return false;
     }
-    else
+    if(pJson.isMember("boro"))
     {
-        err="The name column cannot be null";
-        return false;
-    }
-    if(pJson.isMember("url"))
-    {
-        if(!validJsonOfField(2, "url", pJson["url"], err, true))
+        if(!validJsonOfField(2, "boro", pJson["boro"], err, true))
             return false;
     }
-    if(pJson.isMember("rating"))
+    if(pJson.isMember("building"))
     {
-        if(!validJsonOfField(3, "rating", pJson["rating"], err, true))
+        if(!validJsonOfField(3, "building", pJson["building"], err, true))
             return false;
     }
-    if(pJson.isMember("rating_count"))
+    if(pJson.isMember("street"))
     {
-        if(!validJsonOfField(4, "rating_count", pJson["rating_count"], err, true))
+        if(!validJsonOfField(4, "street", pJson["street"], err, true))
             return false;
     }
-    if(pJson.isMember("detailed_ratings"))
+    if(pJson.isMember("zipcode"))
     {
-        if(!validJsonOfField(5, "detailed_ratings", pJson["detailed_ratings"], err, true))
+        if(!validJsonOfField(5, "zipcode", pJson["zipcode"], err, true))
             return false;
     }
-    if(pJson.isMember("price_category"))
+    if(pJson.isMember("phone"))
     {
-        if(!validJsonOfField(6, "price_category", pJson["price_category"], err, true))
+        if(!validJsonOfField(6, "phone", pJson["phone"], err, true))
             return false;
     }
-    if(pJson.isMember("address"))
+    if(pJson.isMember("cuisine"))
     {
-        if(!validJsonOfField(7, "address", pJson["address"], err, true))
+        if(!validJsonOfField(7, "cuisine", pJson["cuisine"], err, true))
+            return false;
+    }
+    if(pJson.isMember("inspection_date"))
+    {
+        if(!validJsonOfField(8, "inspection_date", pJson["inspection_date"], err, true))
+            return false;
+    }
+    if(pJson.isMember("grade"))
+    {
+        if(!validJsonOfField(9, "grade", pJson["grade"], err, true))
             return false;
     }
     if(pJson.isMember("latitude"))
     {
-        if(!validJsonOfField(8, "latitude", pJson["latitude"], err, true))
+        if(!validJsonOfField(10, "latitude", pJson["latitude"], err, true))
             return false;
     }
     if(pJson.isMember("longitude"))
     {
-        if(!validJsonOfField(9, "longitude", pJson["longitude"], err, true))
+        if(!validJsonOfField(11, "longitude", pJson["longitude"], err, true))
             return false;
     }
-    if(pJson.isMember("zip_code"))
+    if(pJson.isMember("last_updated"))
     {
-        if(!validJsonOfField(10, "zip_code", pJson["zip_code"], err, true))
+        if(!validJsonOfField(12, "last_updated", pJson["last_updated"], err, true))
             return false;
     }
     return true;
@@ -1484,7 +1917,7 @@ bool Restaurants::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                      const std::vector<std::string> &pMasqueradingVector,
                                                      std::string &err)
 {
-    if(pMasqueradingVector.size() != 11)
+    if(pMasqueradingVector.size() != 13)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1497,6 +1930,11 @@ bool Restaurants::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
                   return false;
           }
+        else
+        {
+            err="The " + pMasqueradingVector[0] + " column cannot be null";
+            return false;
+        }
       }
       if(!pMasqueradingVector[1].empty())
       {
@@ -1505,11 +1943,6 @@ bool Restaurants::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[1] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[2].empty())
       {
@@ -1583,6 +2016,22 @@ bool Restaurants::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                   return false;
           }
       }
+      if(!pMasqueradingVector[11].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[11]))
+          {
+              if(!validJsonOfField(11, pMasqueradingVector[11], pJson[pMasqueradingVector[11]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[12].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[12]))
+          {
+              if(!validJsonOfField(12, pMasqueradingVector[12], pJson[pMasqueradingVector[12]], err, true))
+                  return false;
+          }
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -1593,9 +2042,9 @@ bool Restaurants::validateMasqueradedJsonForCreation(const Json::Value &pJson,
 }
 bool Restaurants::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
 {
-    if(pJson.isMember("id"))
+    if(pJson.isMember("camis"))
     {
-        if(!validJsonOfField(0, "id", pJson["id"], err, false))
+        if(!validJsonOfField(0, "camis", pJson["camis"], err, false))
             return false;
     }
     else
@@ -1608,49 +2057,59 @@ bool Restaurants::validateJsonForUpdate(const Json::Value &pJson, std::string &e
         if(!validJsonOfField(1, "name", pJson["name"], err, false))
             return false;
     }
-    if(pJson.isMember("url"))
+    if(pJson.isMember("boro"))
     {
-        if(!validJsonOfField(2, "url", pJson["url"], err, false))
+        if(!validJsonOfField(2, "boro", pJson["boro"], err, false))
             return false;
     }
-    if(pJson.isMember("rating"))
+    if(pJson.isMember("building"))
     {
-        if(!validJsonOfField(3, "rating", pJson["rating"], err, false))
+        if(!validJsonOfField(3, "building", pJson["building"], err, false))
             return false;
     }
-    if(pJson.isMember("rating_count"))
+    if(pJson.isMember("street"))
     {
-        if(!validJsonOfField(4, "rating_count", pJson["rating_count"], err, false))
+        if(!validJsonOfField(4, "street", pJson["street"], err, false))
             return false;
     }
-    if(pJson.isMember("detailed_ratings"))
+    if(pJson.isMember("zipcode"))
     {
-        if(!validJsonOfField(5, "detailed_ratings", pJson["detailed_ratings"], err, false))
+        if(!validJsonOfField(5, "zipcode", pJson["zipcode"], err, false))
             return false;
     }
-    if(pJson.isMember("price_category"))
+    if(pJson.isMember("phone"))
     {
-        if(!validJsonOfField(6, "price_category", pJson["price_category"], err, false))
+        if(!validJsonOfField(6, "phone", pJson["phone"], err, false))
             return false;
     }
-    if(pJson.isMember("address"))
+    if(pJson.isMember("cuisine"))
     {
-        if(!validJsonOfField(7, "address", pJson["address"], err, false))
+        if(!validJsonOfField(7, "cuisine", pJson["cuisine"], err, false))
+            return false;
+    }
+    if(pJson.isMember("inspection_date"))
+    {
+        if(!validJsonOfField(8, "inspection_date", pJson["inspection_date"], err, false))
+            return false;
+    }
+    if(pJson.isMember("grade"))
+    {
+        if(!validJsonOfField(9, "grade", pJson["grade"], err, false))
             return false;
     }
     if(pJson.isMember("latitude"))
     {
-        if(!validJsonOfField(8, "latitude", pJson["latitude"], err, false))
+        if(!validJsonOfField(10, "latitude", pJson["latitude"], err, false))
             return false;
     }
     if(pJson.isMember("longitude"))
     {
-        if(!validJsonOfField(9, "longitude", pJson["longitude"], err, false))
+        if(!validJsonOfField(11, "longitude", pJson["longitude"], err, false))
             return false;
     }
-    if(pJson.isMember("zip_code"))
+    if(pJson.isMember("last_updated"))
     {
-        if(!validJsonOfField(10, "zip_code", pJson["zip_code"], err, false))
+        if(!validJsonOfField(12, "last_updated", pJson["last_updated"], err, false))
             return false;
     }
     return true;
@@ -1659,7 +2118,7 @@ bool Restaurants::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                    const std::vector<std::string> &pMasqueradingVector,
                                                    std::string &err)
 {
-    if(pMasqueradingVector.size() != 11)
+    if(pMasqueradingVector.size() != 13)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1725,6 +2184,16 @@ bool Restaurants::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
           if(!validJsonOfField(10, pMasqueradingVector[10], pJson[pMasqueradingVector[10]], err, false))
               return false;
       }
+      if(!pMasqueradingVector[11].empty() && pJson.isMember(pMasqueradingVector[11]))
+      {
+          if(!validJsonOfField(11, pMasqueradingVector[11], pJson[pMasqueradingVector[11]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[12].empty() && pJson.isMember(pMasqueradingVector[12]))
+      {
+          if(!validJsonOfField(12, pMasqueradingVector[12], pJson[pMasqueradingVector[12]], err, false))
+              return false;
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -1747,11 +2216,6 @@ bool Restaurants::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(isForCreation)
-            {
-                err="The automatic primary key cannot be set";
-                return false;
-            }
             if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
@@ -1761,8 +2225,7 @@ bool Restaurants::validJsonOfField(size_t index,
         case 1:
             if(pJson.isNull())
             {
-                err="The " + fieldName + " column cannot be null";
-                return false;
+                return true;
             }
             if(!pJson.isString())
             {
@@ -1786,7 +2249,7 @@ bool Restaurants::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isNumeric())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1797,7 +2260,7 @@ bool Restaurants::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isNumeric())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1819,7 +2282,7 @@ bool Restaurants::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isNumeric())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1841,7 +2304,7 @@ bool Restaurants::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isNumeric())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1852,13 +2315,35 @@ bool Restaurants::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isNumeric())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
             }
             break;
         case 10:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isNumeric())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 11:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isNumeric())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 12:
             if(pJson.isNull())
             {
                 return true;

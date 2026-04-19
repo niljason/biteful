@@ -44,17 +44,19 @@ class Restaurants
   public:
     struct Cols
     {
-        static const std::string _id;
+        static const std::string _camis;
         static const std::string _name;
-        static const std::string _url;
-        static const std::string _rating;
-        static const std::string _rating_count;
-        static const std::string _detailed_ratings;
-        static const std::string _price_category;
-        static const std::string _address;
+        static const std::string _boro;
+        static const std::string _building;
+        static const std::string _street;
+        static const std::string _zipcode;
+        static const std::string _phone;
+        static const std::string _cuisine;
+        static const std::string _inspection_date;
+        static const std::string _grade;
         static const std::string _latitude;
         static const std::string _longitude;
-        static const std::string _zip_code;
+        static const std::string _last_updated;
     };
 
     static const int primaryKeyNumber;
@@ -106,13 +108,13 @@ class Restaurants
                           std::string &err,
                           bool isForCreation);
 
-    /**  For column id  */
-    ///Get the value of the column id, returns the default value if the column is null
-    const int32_t &getValueOfId() const noexcept;
+    /**  For column camis  */
+    ///Get the value of the column camis, returns the default value if the column is null
+    const int32_t &getValueOfCamis() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getId() const noexcept;
-    ///Set the value of the column id
-    void setId(const int32_t &pId) noexcept;
+    const std::shared_ptr<int32_t> &getCamis() const noexcept;
+    ///Set the value of the column camis
+    void setCamis(const int32_t &pCamis) noexcept;
 
     /**  For column name  */
     ///Get the value of the column name, returns the default value if the column is null
@@ -122,63 +124,86 @@ class Restaurants
     ///Set the value of the column name
     void setName(const std::string &pName) noexcept;
     void setName(std::string &&pName) noexcept;
+    void setNameToNull() noexcept;
 
-    /**  For column url  */
-    ///Get the value of the column url, returns the default value if the column is null
-    const std::string &getValueOfUrl() const noexcept;
+    /**  For column boro  */
+    ///Get the value of the column boro, returns the default value if the column is null
+    const std::string &getValueOfBoro() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getUrl() const noexcept;
-    ///Set the value of the column url
-    void setUrl(const std::string &pUrl) noexcept;
-    void setUrl(std::string &&pUrl) noexcept;
-    void setUrlToNull() noexcept;
+    const std::shared_ptr<std::string> &getBoro() const noexcept;
+    ///Set the value of the column boro
+    void setBoro(const std::string &pBoro) noexcept;
+    void setBoro(std::string &&pBoro) noexcept;
+    void setBoroToNull() noexcept;
 
-    /**  For column rating  */
-    ///Get the value of the column rating, returns the default value if the column is null
-    const double &getValueOfRating() const noexcept;
+    /**  For column building  */
+    ///Get the value of the column building, returns the default value if the column is null
+    const std::string &getValueOfBuilding() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<double> &getRating() const noexcept;
-    ///Set the value of the column rating
-    void setRating(const double &pRating) noexcept;
-    void setRatingToNull() noexcept;
+    const std::shared_ptr<std::string> &getBuilding() const noexcept;
+    ///Set the value of the column building
+    void setBuilding(const std::string &pBuilding) noexcept;
+    void setBuilding(std::string &&pBuilding) noexcept;
+    void setBuildingToNull() noexcept;
 
-    /**  For column rating_count  */
-    ///Get the value of the column rating_count, returns the default value if the column is null
-    const double &getValueOfRatingCount() const noexcept;
+    /**  For column street  */
+    ///Get the value of the column street, returns the default value if the column is null
+    const std::string &getValueOfStreet() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<double> &getRatingCount() const noexcept;
-    ///Set the value of the column rating_count
-    void setRatingCount(const double &pRatingCount) noexcept;
-    void setRatingCountToNull() noexcept;
+    const std::shared_ptr<std::string> &getStreet() const noexcept;
+    ///Set the value of the column street
+    void setStreet(const std::string &pStreet) noexcept;
+    void setStreet(std::string &&pStreet) noexcept;
+    void setStreetToNull() noexcept;
 
-    /**  For column detailed_ratings  */
-    ///Get the value of the column detailed_ratings, returns the default value if the column is null
-    const std::string &getValueOfDetailedRatings() const noexcept;
+    /**  For column zipcode  */
+    ///Get the value of the column zipcode, returns the default value if the column is null
+    const std::string &getValueOfZipcode() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getDetailedRatings() const noexcept;
-    ///Set the value of the column detailed_ratings
-    void setDetailedRatings(const std::string &pDetailedRatings) noexcept;
-    void setDetailedRatings(std::string &&pDetailedRatings) noexcept;
-    void setDetailedRatingsToNull() noexcept;
+    const std::shared_ptr<std::string> &getZipcode() const noexcept;
+    ///Set the value of the column zipcode
+    void setZipcode(const std::string &pZipcode) noexcept;
+    void setZipcode(std::string &&pZipcode) noexcept;
+    void setZipcodeToNull() noexcept;
 
-    /**  For column price_category  */
-    ///Get the value of the column price_category, returns the default value if the column is null
-    const double &getValueOfPriceCategory() const noexcept;
+    /**  For column phone  */
+    ///Get the value of the column phone, returns the default value if the column is null
+    const std::string &getValueOfPhone() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<double> &getPriceCategory() const noexcept;
-    ///Set the value of the column price_category
-    void setPriceCategory(const double &pPriceCategory) noexcept;
-    void setPriceCategoryToNull() noexcept;
+    const std::shared_ptr<std::string> &getPhone() const noexcept;
+    ///Set the value of the column phone
+    void setPhone(const std::string &pPhone) noexcept;
+    void setPhone(std::string &&pPhone) noexcept;
+    void setPhoneToNull() noexcept;
 
-    /**  For column address  */
-    ///Get the value of the column address, returns the default value if the column is null
-    const std::string &getValueOfAddress() const noexcept;
+    /**  For column cuisine  */
+    ///Get the value of the column cuisine, returns the default value if the column is null
+    const std::string &getValueOfCuisine() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getAddress() const noexcept;
-    ///Set the value of the column address
-    void setAddress(const std::string &pAddress) noexcept;
-    void setAddress(std::string &&pAddress) noexcept;
-    void setAddressToNull() noexcept;
+    const std::shared_ptr<std::string> &getCuisine() const noexcept;
+    ///Set the value of the column cuisine
+    void setCuisine(const std::string &pCuisine) noexcept;
+    void setCuisine(std::string &&pCuisine) noexcept;
+    void setCuisineToNull() noexcept;
+
+    /**  For column inspection_date  */
+    ///Get the value of the column inspection_date, returns the default value if the column is null
+    const ::trantor::Date &getValueOfInspectionDate() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<::trantor::Date> &getInspectionDate() const noexcept;
+    ///Set the value of the column inspection_date
+    void setInspectionDate(const ::trantor::Date &pInspectionDate) noexcept;
+    void setInspectionDateToNull() noexcept;
+
+    /**  For column grade  */
+    ///Get the value of the column grade, returns the default value if the column is null
+    const std::string &getValueOfGrade() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getGrade() const noexcept;
+    ///Set the value of the column grade
+    void setGrade(const std::string &pGrade) noexcept;
+    void setGrade(std::string &&pGrade) noexcept;
+    void setGradeToNull() noexcept;
 
     /**  For column latitude  */
     ///Get the value of the column latitude, returns the default value if the column is null
@@ -198,18 +223,17 @@ class Restaurants
     void setLongitude(const double &pLongitude) noexcept;
     void setLongitudeToNull() noexcept;
 
-    /**  For column zip_code  */
-    ///Get the value of the column zip_code, returns the default value if the column is null
-    const std::string &getValueOfZipCode() const noexcept;
+    /**  For column last_updated  */
+    ///Get the value of the column last_updated, returns the default value if the column is null
+    const ::trantor::Date &getValueOfLastUpdated() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getZipCode() const noexcept;
-    ///Set the value of the column zip_code
-    void setZipCode(const std::string &pZipCode) noexcept;
-    void setZipCode(std::string &&pZipCode) noexcept;
-    void setZipCodeToNull() noexcept;
+    const std::shared_ptr<::trantor::Date> &getLastUpdated() const noexcept;
+    ///Set the value of the column last_updated
+    void setLastUpdated(const ::trantor::Date &pLastUpdated) noexcept;
+    void setLastUpdatedToNull() noexcept;
 
 
-    static size_t getColumnNumber() noexcept {  return 11;  }
+    static size_t getColumnNumber() noexcept {  return 13;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -231,17 +255,19 @@ class Restaurants
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
-    std::shared_ptr<int32_t> id_;
+    std::shared_ptr<int32_t> camis_;
     std::shared_ptr<std::string> name_;
-    std::shared_ptr<std::string> url_;
-    std::shared_ptr<double> rating_;
-    std::shared_ptr<double> ratingCount_;
-    std::shared_ptr<std::string> detailedRatings_;
-    std::shared_ptr<double> priceCategory_;
-    std::shared_ptr<std::string> address_;
+    std::shared_ptr<std::string> boro_;
+    std::shared_ptr<std::string> building_;
+    std::shared_ptr<std::string> street_;
+    std::shared_ptr<std::string> zipcode_;
+    std::shared_ptr<std::string> phone_;
+    std::shared_ptr<std::string> cuisine_;
+    std::shared_ptr<::trantor::Date> inspectionDate_;
+    std::shared_ptr<std::string> grade_;
     std::shared_ptr<double> latitude_;
     std::shared_ptr<double> longitude_;
-    std::shared_ptr<std::string> zipCode_;
+    std::shared_ptr<::trantor::Date> lastUpdated_;
     struct MetaData
     {
         const std::string colName_;
@@ -253,17 +279,17 @@ class Restaurants
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[11]={ false };
+    bool dirtyFlag_[13]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
-        static const std::string sql="select * from " + tableName + " where id = $1";
+        static const std::string sql="select * from " + tableName + " where camis = $1";
         return sql;
     }
 
     static const std::string &sqlForDeletingByPrimaryKey()
     {
-        static const std::string sql="delete from " + tableName + " where id = $1";
+        static const std::string sql="delete from " + tableName + " where camis = $1";
         return sql;
     }
     std::string sqlForInserting(bool &needSelection) const
@@ -271,8 +297,11 @@ class Restaurants
         std::string sql="insert into " + tableName + " (";
         size_t parametersCount = 0;
         needSelection = false;
-            sql += "id,";
+        if(dirtyFlag_[0])
+        {
+            sql += "camis,";
             ++parametersCount;
+        }
         if(dirtyFlag_[1])
         {
             sql += "name,";
@@ -280,50 +309,60 @@ class Restaurants
         }
         if(dirtyFlag_[2])
         {
-            sql += "url,";
+            sql += "boro,";
             ++parametersCount;
         }
         if(dirtyFlag_[3])
         {
-            sql += "rating,";
+            sql += "building,";
             ++parametersCount;
         }
         if(dirtyFlag_[4])
         {
-            sql += "rating_count,";
+            sql += "street,";
             ++parametersCount;
         }
         if(dirtyFlag_[5])
         {
-            sql += "detailed_ratings,";
+            sql += "zipcode,";
             ++parametersCount;
         }
         if(dirtyFlag_[6])
         {
-            sql += "price_category,";
+            sql += "phone,";
             ++parametersCount;
         }
         if(dirtyFlag_[7])
         {
-            sql += "address,";
+            sql += "cuisine,";
             ++parametersCount;
         }
         if(dirtyFlag_[8])
         {
-            sql += "latitude,";
+            sql += "inspection_date,";
             ++parametersCount;
         }
         if(dirtyFlag_[9])
         {
-            sql += "longitude,";
+            sql += "grade,";
             ++parametersCount;
         }
         if(dirtyFlag_[10])
         {
-            sql += "zip_code,";
+            sql += "latitude,";
             ++parametersCount;
         }
-        needSelection=true;
+        if(dirtyFlag_[11])
+        {
+            sql += "longitude,";
+            ++parametersCount;
+        }
+        sql += "last_updated,";
+        ++parametersCount;
+        if(!dirtyFlag_[12])
+        {
+            needSelection=true;
+        }
         if(parametersCount > 0)
         {
             sql[sql.length()-1]=')';
@@ -335,7 +374,11 @@ class Restaurants
         int placeholder=1;
         char placeholderStr[64];
         size_t n=0;
-        sql +="default,";
+        if(dirtyFlag_[0])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
         if(dirtyFlag_[1])
         {
             n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
@@ -385,6 +428,20 @@ class Restaurants
         {
             n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
             sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[11])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        if(dirtyFlag_[12])
+        {
+            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {

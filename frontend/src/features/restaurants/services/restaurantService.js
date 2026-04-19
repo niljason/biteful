@@ -1,8 +1,8 @@
 import { drogonClient } from "../../../api/client";
 
 export const restaurantService = {
-    getAll: async () => {
-        return await drogonClient("restaurants", {
+    getByZipcode: async (zipcode) => {
+        return await drogonClient(`restaurants?zipcode=${encodeURIComponent(zipcode)}`, {
             method: "GET",
         });
     },

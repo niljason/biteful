@@ -44,7 +44,16 @@ void Restaurant::getAllRestaurants(const HttpRequestPtr& req,
     drogon::orm::Mapper<drogon_model::biteful::Restaurants> mapper(dbClient);
 
     try {
-        auto restaurants = mapper.findAll();
+        std::string zipcode = req->getParameter("zipcode");
+
+        std::vector<drogon_model::biteful::Restaurants> restaurants;
+        if (!zipcode.empty()) {
+            Criteria criteria(drogon_model::biteful::Restaurants::Cols::_zipcode,
+                              CompareOperator::EQ, zipcode);
+            restaurants = mapper.findBy(criteria);
+        } else {
+            restaurants = mapper.findAll();
+        }
 
         LOG_INFO << "Found " << restaurants.size() << " rows in database.";
 
@@ -58,7 +67,7 @@ void Restaurant::getAllRestaurants(const HttpRequestPtr& req,
 
     } catch (const DrogonDbException& e) {
         LOG_ERROR << "DB Error: " << e.base().what();
-        auto resp = HttpResponse::newNotFoundResponse();  // Or a 500 error
+        auto resp = HttpResponse::newNotFoundResponse();
         callback(resp);
     }
 }
