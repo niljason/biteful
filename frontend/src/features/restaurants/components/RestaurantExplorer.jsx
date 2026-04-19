@@ -3,7 +3,7 @@ import { useRestaurants } from '../hooks/useRestaurants';
 import RestaurantMap from './RestaurantMap';
 
 const RestaurantExplorer = () => {
-    const { groups, loading, error } = useRestaurants();
+    const { restaurants, loading, error } = useRestaurants();
     const [searchZip, setSearchZip] = useState("");
     const [mapTarget, setMapTarget] = useState(null);
 
@@ -14,7 +14,7 @@ const RestaurantExplorer = () => {
 
     const handleSearch = () => {
         if (!searchZip) return;
-        const match = groups.find(g => g.address.includes(searchZip));
+        const match = restaurants.find(g => g.address.includes(searchZip));
         if (match) {
             setMapTarget({ lat: match.latitude, lng: match.longitude });
         } else {
@@ -35,7 +35,7 @@ const RestaurantExplorer = () => {
                 <button onClick={handleSearch}>Search</button>
             </div>
             <div className="map-frame">
-                {!loading && <RestaurantMap restaurants={groups} target={mapTarget} />}
+                {!loading && <RestaurantMap restaurants={restaurants} target={mapTarget} />}
             </div>
         </div>
     );

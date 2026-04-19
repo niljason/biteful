@@ -3,7 +3,7 @@ import { restaurantService } from '../services/restaurantService';
 
 export const useRestaurants = () => {
     const [state, setState] = useState({
-        restaurants: [], // Initialized as empty array to prevent .map() undefined errors
+        restaurants: [],
         loading: true,
         error: null
     });
@@ -12,42 +12,35 @@ export const useRestaurants = () => {
         const fetchRestaurants = async () => {
             try {
                 const rawData = await restaurantService.getAll();
-                
-                // Grouping Logic: Coordinates as the unique key
-                const grouped = rawData.reduce((acc, item) => {
-                    const lat = parseFloat(item.latitude);
-                    const lng = parseFloat(item.longitude);
-                    
-                    if (isNaN(lat) || isNaN(lng)) return acc;
 
-                    const key = `${lat}_${lng}`;
-                    
-                    if (!acc[key]) {
-                        acc[key] = {
-                            id: key,
+                const restaurants = rawData
+                    .filter(item => {
+                        const lat = parseFloat(item.latitude);
+                        const lng = parseFloat(item.longitude);
+                        return !isNaN(lat) && !isNaN(lng);
+                    })
+                    .map(item => {
+                        const parts = [item.building, item.street, item.boro, item.zipcode ? `NY ${item.zipcode}` : null];
+                        const address = parts.filter(Boolean).join(', ');
+                        return {
+                            id: item.camis,
                             name: item.name?.trim() || "Unknown Restaurant",
-                            address: item.address?.trim() || "",
-                            latitude: lat,
-                            longitude: lng,
-                            rating: item.rating != null ? Number(item.rating) : null,
-                            rating_count: item.rating_count != null ? Number(item.rating_count) : null,
-                            price_category: item.price_category != null ? Number(item.price_category) : null,
-                            url: item.url?.trim() || "",
-                            zip_code: item.zip_code?.trim() || ""
+                            address,
+                            latitude: parseFloat(item.latitude),
+                            longitude: parseFloat(item.longitude),
+                            boro: item.boro?.trim() || "",
+                            cuisine: item.cuisine?.trim() || "",
+                            phone: item.phone?.trim() || "",
+                            grade: item.grade?.trim() || "",
+                            inspection_date: item.inspection_date || null,
                         };
-                    }
-                    return acc;
-                }, {});
+                    });
 
-                setState({
-                    groups: Object.values(grouped),
-                    loading: false,
-                    error: null
-                });
+                setState({ restaurants, loading: false, error: null });
             } catch (err) {
                 console.error("Failed to load restaurants:", err);
                 setState({
-                    groups: [],
+                    restaurants: [],
                     loading: false,
                     error: err.message || "Failed to fetch restaurant data"
                 });

@@ -12,10 +12,6 @@ function MapUpdater({ target }) {
   return null;
 }
 
-function formatPrice(category) {
-  if (!category) return null;
-  return '$'.repeat(Math.round(category));
-}
 
 const RestaurantMap = ({ restaurants = [], target }) => {
   return (
@@ -40,22 +36,17 @@ const RestaurantMap = ({ restaurants = [], target }) => {
               <p className="rpc-name">{restaurant.name}</p>
 
               <div className="rpc-meta">
-                {restaurant.rating && (
-                  <span className="rpc-rating">
-                    ⭐
-                    {Number(restaurant.rating).toFixed(1)}
-                    {restaurant.rating_count && (
-                      <span className="rpc-count">
-                        ({Math.round(restaurant.rating_count).toLocaleString()})
-                      </span>
-                    )}
-
-                  </span>
+                {restaurant.cuisine && (
+                  <span className="rpc-cuisine">{restaurant.cuisine}</span>
                 )}
-                {formatPrice(restaurant.price_category) && (
-                  <span className="rpc-price">{formatPrice(restaurant.price_category)}</span>
+                {restaurant.grade && (
+                  <span className="rpc-grade">Grade: {restaurant.grade}</span>
                 )}
               </div>
+
+              {restaurant.phone && (
+                <div className="rpc-phone">📞 {restaurant.phone}</div>
+              )}
 
               {restaurant.address && (
                 <>
