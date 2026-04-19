@@ -45,8 +45,12 @@ const RestaurantMap = ({ restaurants = [], target }) => {
                 )}
               </div>
 
-              <Link to={`/menu/${restaurant.id}`}>View Menu</Link>
-              <Link to={`/menu/${restaurant.id}/upload`}>Upload Menu</Link>
+              <Link to={`/menu/${restaurant.id}`} state={{ name: restaurant.name, address: restaurant.address, phone:restaurant.phone }}>
+                View Menu
+              </Link>
+              <Link to={`/menu/${restaurant.id}/upload`} state={{ name: restaurant.name, address: restaurant.address, phone:restaurant.phone }}>
+                Upload Menu
+              </Link>
 
               {restaurant.phone && (
                 <div className="rpc-phone">📞 {restaurant.phone}</div>
