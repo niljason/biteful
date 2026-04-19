@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePantries } from '../hooks/usePantries';
 import PantryMap from './PantryMap';
 import './pantries.css';
@@ -29,20 +29,20 @@ const PantryExplorer = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [zipError, setZipError] = useState('');
 
+    // filter(Boolean) removes falsy values for safety
+    // useMemo to cache data
+    const pantryTypes = useMemo(() => {
+        return [...new Set(
+            groups.flatMap(group => 
+                group.programs.map(p => p.program?.trim()).filter(Boolean)
+            )
+        )].sort();
+    }, [groups]);
+
     // If loading, show a message instead of the map
     if (loading) return <div className="loading">Loading pantry data...</div>;
     // If error, show the error
     if (error) return <div className="error">Error: {error}</div>;
-
-    const pantryTypes = Array.from(
-        new Set(
-            groups.flatMap((group) =>
-                group.programs
-                    .map((program) => program.program?.trim())
-                    .filter(Boolean)
-            )
-        )
-    ).sort((a, b) => a.localeCompare(b));
 
     const toggleSelection = (value, setSelectedValues) => {
         setSelectedValues((current) =>
@@ -52,23 +52,27 @@ const PantryExplorer = () => {
         );
     };
 
+    // groups is data loaded from backend
+    // a pantry can have multiple programs, programs is an array
     const filteredGroups = groups.filter((group) => {
-        const extractedZip = extractZipCode(group.address);
-        const matchesZip = ZIP_CODE_PATTERN.test(searchZip)
-            ? extractedZip === searchZip
-            : true;
+        if (ZIP_CODE_PATTERN.test(searchZip)) {
+            if (extractZipCode(group.address) !== searchZip) return false;
+        }
 
-        const matchesDays = selectedDays.length
-            ? group.programs.some((program) => selectedDays.includes(program.day_of_week))
-            : true;
+        if (selectedDays.length > 0) {
+            const hasDay = group.programs.some(p => selectedDays.includes(p.day_of_week));
+            if (!hasDay) return false;
+        }
 
-        const matchesTypes = selectedTypes.length
-            ? group.programs.some((program) => selectedTypes.includes(program.program?.trim()))
-            : true;
+        if (selectedTypes.length > 0) {
+            const hasType = group.programs.some(p => selectedTypes.includes(p.program?.trim()));
+            if (!hasType) return false;
+        }
 
-        return matchesZip && matchesDays && matchesTypes;
+        return true;
     });
 
+    // handles search only on enter of zip code
     const handleSearch = () => {
         if (!searchZip) return;
         if (!ZIP_CODE_PATTERN.test(searchZip)) {
@@ -98,12 +102,8 @@ const PantryExplorer = () => {
         const nextZip = event.target.value.replace(/\D/g, '').slice(0, 5);
         setSearchZip(nextZip);
 
-        if (!nextZip) {
-            setZipError('');
-            return;
-        }
-
-        setZipError(ZIP_CODE_PATTERN.test(nextZip) ? '' : 'Enter a valid 5-digit ZIP code.');
+        const isInvalid = nextZip.length > 0 && nextZip.length < 5;
+        setZipError(isInvalid ? 'Enter a valid 5-digit ZIP code.' : '');
     };
 
     const handleUseMyLocation = () => {
