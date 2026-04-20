@@ -6,16 +6,16 @@ const MenuUploader = () => {
     const { name, address, phone } = state || {};
 
     return (
-        <div className="menu-page-container">
-            <div className="menu-header">
+        <div>
+            <div>
                 <h2>{name || 'Upload Menu'}</h2>
-                {address && <p className="menu-subtext">{address}</p>}
-                {phone && <p className="menu-subtext">{phone}</p>}
-                <Link to={`/menu/${camis}`} state={state} className="menu-back-link">
+                {address && <p>{address}</p>}
+                {phone && <p>{phone}</p>}
+                <Link to={`/${camis}/menu`} state={state}>
                     Back to Menu
                 </Link>
             </div>
-            <div className="menu-upload-area">
+            <div>
                 <p>Upload functionality coming soon</p>
             </div>
         </div>

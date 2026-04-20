@@ -73,7 +73,7 @@ const router = createBrowserRouter([
         middleware: [isAuthenticated],
     },
     {
-        path: "/menu/:camis",
+        path: "/:camis/menu",
         element: (
             <MainLayout>
                 <MenuViewer />
@@ -82,7 +82,7 @@ const router = createBrowserRouter([
         middleware: [isAuthenticated],
     },
     {
-        path: "/menu/:camis/upload",
+        path: "/:camis/menu/upload",
         element: (
             <MainLayout>
                 <MenuUploader />

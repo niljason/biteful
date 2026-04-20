@@ -6,16 +6,16 @@ const MenuViewer = () => {
     const { name, address, phone } = state || {};
 
     return (
-        <div className="menu-page-container">
-            <div className="menu-header">
+        <div>
+            <div>
                 <h2>{name || 'Restaurant Menu'}</h2>
-                {address && <p className="menu-subtext">{address}</p>}
-                {phone && <p className="menu-subtext">{phone}</p>}
-                <Link to={`/menu/${camis}/upload`} state={state} className="menu-upload-link">
+                {address && <p>{address}</p>}
+                {phone && <p>{phone}</p>}
+                <Link to={`/${camis}/menu/upload`} state={state}>
                     Upload Menu
                 </Link>
             </div>
-            <div className="menu-content">
+            <div>
                 <p>No menu available yet</p>
             </div>
         </div>

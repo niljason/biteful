@@ -45,10 +45,10 @@ const RestaurantMap = ({ restaurants = [], target }) => {
                 )}
               </div>
 
-              <Link to={`/menu/${restaurant.id}`} state={{ name: restaurant.name, address: restaurant.address, phone:restaurant.phone }}>
+              <Link to={`/${restaurant.id}/menu`} state={{ name: restaurant.name, address: restaurant.address, phone:restaurant.phone }}>
                 View Menu
               </Link>
-              <Link to={`/menu/${restaurant.id}/upload`} state={{ name: restaurant.name, address: restaurant.address, phone:restaurant.phone }}>
+              <Link to={`/${restaurant.id}/menu/upload`} state={{ name: restaurant.name, address: restaurant.address, phone:restaurant.phone }}>
                 Upload Menu
               </Link>
 
