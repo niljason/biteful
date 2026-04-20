@@ -35,4 +35,4 @@ const ZipSearchInput = ({
     </div>
 );
 
-export default ZipSearchInput;
+export default React.memo(ZipSearchInput);
