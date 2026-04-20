@@ -1,7 +1,7 @@
 import React from 'react';
 
 const ZipSearchInput = ({ 
-    zip, 
+    inputRef, 
     onChange, 
     onSearch, 
     onGeoClick, 
@@ -12,12 +12,12 @@ const ZipSearchInput = ({
         <div className="pantry-input-wrapper">
             <div className="pantry-search-button-sq" onClick={onSearch}>🔍</div>
             <input 
+                ref={inputRef}
                 type="text"
                 inputMode="numeric"
                 maxLength={5}
                 placeholder="Enter 5-digit ZIP code"
                 className="pantry-zip-input"
-                value={zip}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && onSearch()}
             />

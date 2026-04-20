@@ -22,24 +22,43 @@ const PantryExplorer = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
 
     const { 
-        zip, 
+        inputRef, 
+        committedZip,
         zipError, 
+        setZipError,
         geoLoading, 
         handleZipChange, 
         handleMyLocation, 
-        validateZip,
-        setZip 
+        resetZip
+
     } = useLocationSearch((coords) => setMapTarget(coords));
+
+    const processedGroups = useMemo(() => {
+        return (groups || []).map(group => {
+            // Extract ZIP once per group
+            const zip = extractZipCode(group.address);
+            
+            return {
+                ...group,
+                extractedZip: zip,
+                cleanPrograms: (group.programs || []).map(p => ({
+                    ...p,
+                    cleanType: p.program?.trim() || '',
+                    day: p.day_of_week
+                }))
+            };
+        });
+    }, [groups]);
 
     // filter(Boolean) removes falsy values for safety
     // useMemo to cache data
     const pantryTypes = useMemo(() => {
         return [...new Set(
-            groups.flatMap(group => 
-                group.programs.map(p => p.program?.trim()).filter(Boolean)
+            processedGroups.flatMap(group => 
+                group.cleanPrograms.map(p => p.type).filter(Boolean)
             )
         )].sort();
-    }, [groups]);
+    }, [processedGroups]);
 
     const toggleSelection = (value, setSelectedValues) => {
         setSelectedValues((current) =>
@@ -52,39 +71,49 @@ const PantryExplorer = () => {
     // groups is data loaded from backend
     // a pantry can have multiple programs, programs is an array
     const filteredGroups = useMemo(() => {
-        return groups.filter((group) => {
-            // Only filter by ZIP if the user has entered a full 5-digit code
-            if (zip.length === 5) {
-                if (extractZipCode(group.address) !== zip) return false;
+        return processedGroups.filter((group) => {
+            if (committedZip.length === 5) {
+                if (group.extractedZip !== committedZip) return false;
             }
 
             if (selectedDays.length > 0) {
-                const hasDay = group.programs.some(p => selectedDays.includes(p.day_of_week));
+                const hasDay = group.cleanPrograms.some(p => 
+                    selectedDays.includes(p.day)
+                );
                 if (!hasDay) return false;
             }
 
             if (selectedTypes.length > 0) {
-                const hasType = group.programs.some(p => selectedTypes.includes(p.program?.trim()));
+                const hasType = group.cleanPrograms.some(p => 
+                    selectedTypes.includes(p.cleanType)
+                );
                 if (!hasType) return false;
             }
 
             return true;
         });
-    }, [groups, zip, selectedDays, selectedTypes]);
+    }, [processedGroups, committedZip, selectedDays, selectedTypes]);
 
     const handleSearch = () => {
-        if (!validateZip()) return;
+        const currentZip = inputRef.current?.value || "";
 
-        const match = filteredGroups.find((group) => extractZipCode(group.address) === zip);
+        if (currentZip.length !== 5) {
+            setZipError("Enter a valid 5-digit ZIP code.");
+            return;
+        }
+
+        setZipError("");
+        const match = processedGroups.find((group) => group.extractedZip === currentZip);
+
         if (match) {
             setMapTarget({ lat: match.latitude, lng: match.longitude });
         } else {
-            alert("No pantries found for the current filters.");
+            alert("No pantries found for this ZIP code.");
         }
     };
 
     const clearFilters = () => {
-        setZip("");
+        resetZip();
         setSelectedDays([]);
         setSelectedTypes([]);
         setMapTarget(null);
@@ -101,7 +130,7 @@ const PantryExplorer = () => {
                 <span className="pantry-search-title">FIND LOCAL FOOD PANTRIES</span>
 
             <ZipSearchInput 
-                    zip={zip}
+                    inputRef={inputRef}
                     onChange={handleZipChange}
                     onSearch={handleSearch}
                     onGeoClick={handleMyLocation}

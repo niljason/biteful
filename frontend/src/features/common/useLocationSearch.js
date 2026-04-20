@@ -1,21 +1,32 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback} from 'react';
 
 const ZIP_CODE_PATTERN = /^\d{5}$/;
 
 export const extractZipCode = (address = '') => {
-    const zipMatch = address.match(/\b\d{5}(?:-\d{4})?\b/);
-    return zipMatch ? zipMatch[0].slice(0, 5) : '';
+    const match = address.trim().match(/\d{5}$/);
+    return match ? match[0] : '';
 };
 
 export const useLocationSearch = (onLocationFound) => {
-    const [zip, setZip] = useState("");
+    const inputRef = useRef(null);
+    const debounceRef = useRef(null);
+    const [committedZip, setCommittedZip] = useState("");
     const [zipError, setZipError] = useState("");
     const [geoLoading, setGeoLoading] = useState(false);
 
     const handleZipChange = (val) => {
         const cleanZip = val.replace(/\D/g, '').slice(0, 5);
-        setZip(cleanZip);
-        setZipError(cleanZip.length > 0 && cleanZip.length < 5 ? 'Enter a valid 5-digit ZIP code.' : '');
+        if (inputRef.current) inputRef.current.value = cleanZip;
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (cleanZip.length === 5) {
+            setCommittedZip(cleanZip);
+        } else if (cleanZip.length === 0) {
+            debounceRef.current = setTimeout(() => setCommittedZip(""), 0);
+        }
+        
+        if (zipError) setZipError("");
     };
 
     const handleMyLocation = () => {
@@ -34,11 +45,15 @@ export const useLocationSearch = (onLocationFound) => {
         );
     };
 
-    const validateZip = () => {
-        const isValid = ZIP_CODE_PATTERN.test(zip);
-        if (!isValid) setZipError('Enter a valid 5-digit ZIP code.');
-        return isValid;
-    };
+    const resetZip = useCallback(() => {
+        if (inputRef.current) {
+            inputRef.current.value = "";
+        }
+        setCommittedZip("");
+        setZipError(""); 
+    }, []);
 
-    return { zip, setZip, zipError, geoLoading, handleZipChange, handleMyLocation, validateZip };
+    return { 
+        inputRef, committedZip, zipError, setZipError, geoLoading, handleZipChange, handleMyLocation, resetZip 
+    };
 };
