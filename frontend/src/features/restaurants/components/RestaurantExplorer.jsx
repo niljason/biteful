@@ -1,49 +1,98 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRestaurants } from '../hooks/useRestaurants';
+import { useLocationSearch } from '../../common/useLocationSearch';
+import ZipSearchInput from '../../common/components/ZipSearchInput';
 import RestaurantMap from './RestaurantMap';
-import './restaurants.css'
+import './restaurants.css';
 
 const RestaurantExplorer = () => {
-    const { restaurants, loading, error, fetchByZipcode } = useRestaurants();
-    const [zipInput, setZipInput] = useState("");
-    const [activeZip, setActiveZip] = useState(null);
+    const { 
+        restaurants = [], 
+        loading = false, 
+        error = null, 
+        fetchByZipcode,
+        fetchAll 
+    } = useRestaurants() || {};
+
+    const [mapTarget, setMapTarget] = useState(null);
+
+    const locationSearch = useLocationSearch((coords) => setMapTarget(coords)) || {};
+    
+    const { 
+        inputRef, 
+        committedZip = "",
+        zipError = "", 
+        setZipError = () => {},
+        geoLoading = false, 
+        handleZipChange = () => {}, 
+        handleMyLocation = () => {}
+    } = locationSearch;
+
+    useEffect(() => {
+        if (fetchAll) {
+            fetchAll();
+        }
+    }, [fetchAll]);
 
     const handleSearch = () => {
-        const zip = zipInput.trim();
-        if (!zip) return;
-        setActiveZip(zip);
-        fetchByZipcode(zip);
+        const currentZip = inputRef?.current?.value || "";
+        if (currentZip.length !== 5) {
+            setZipError("Enter a valid 5-digit ZIP.");
+            return;
+        }
+        setZipError("");
+        if (fetchByZipcode) fetchByZipcode(currentZip);
     };
+
+    const derivedMapTarget = useMemo(() => {
+        if (mapTarget) return mapTarget;
+        if (loading || !committedZip || restaurants.length === 0) return null;
+
+        const first = restaurants[0];
+        if (!first?.latitude || !first?.longitude) return null;
+
+        return {
+            lat: Number(first.latitude),
+            lng: Number(first.longitude)
+        };
+    }, [committedZip, loading, mapTarget, restaurants]);
 
     return (
         <div className="restaurant-page-container">
-            <div className="search-header">
-                <input
-                    type="text"
-                    placeholder="Enter Zip Code (e.g., 10011)"
-                    value={zipInput}
-                    onChange={(e) => setZipInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            <div className="restaurant-search-section">
+                <div className="header-flex">
+                    <span className="pantry-search-title">RESTAURANT EXPLORER</span>
+                    {!loading && (
+                        <span className="res-count-badge">
+                            {restaurants.length.toLocaleString()} locations found
+                        </span>
+                    )}
+                </div>
+
+                <ZipSearchInput 
+                    inputRef={inputRef}
+                    onChange={handleZipChange}
+                    onSearch={handleSearch}
+                    onGeoClick={handleMyLocation}
+                    loading={geoLoading || loading}
+                    error={zipError || error}
                 />
-                <button onClick={handleSearch}>Search</button>
             </div>
 
-            {loading && <div className="loading">Loading restaurants for {activeZip}...</div>}
-            {error && <div className="error">Error: {error}</div>}
+            {/* Map Frame */}
+            <div className="map-frame" style={{ position: 'relative' }}>
+                {loading && (
+                    <div className="map-loading-overlay">
+                        <div className="spinner"></div>
+                        <p>Loading {restaurants.length === 0 ? 'City Data' : 'Clusters'}...</p>
+                    </div>
+                )}
 
-            {!activeZip && !loading && (
-                <div className="loading">Enter a zip code to view restaurants on the map.</div>
-            )}
-
-            {activeZip && !loading && !error && restaurants.length === 0 && (
-                <div className="loading">No restaurants found for zip code {activeZip}.</div>
-            )}
-
-            {activeZip && !loading && restaurants.length > 0 && (
-                <div>
-                    <RestaurantMap restaurants={restaurants} target={null} />
-                </div>
-            )}
+                <RestaurantMap 
+                    restaurants={restaurants} 
+                    target={derivedMapTarget} 
+                />
+            </div>
         </div>
     );
 };

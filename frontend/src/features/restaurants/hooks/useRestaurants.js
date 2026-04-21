@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { startTransition, useCallback, useState } from 'react';
 import { restaurantService } from '../services/restaurantService';
 
 const transformRestaurants = (rawData) =>
@@ -17,6 +17,7 @@ const transformRestaurants = (rawData) =>
                 address,
                 latitude: parseFloat(item.latitude),
                 longitude: parseFloat(item.longitude),
+                zipcode: item.zipcode?.trim() || "",
                 boro: item.boro?.trim() || "",
                 cuisine: item.cuisine?.trim() || "",
                 phone: item.phone?.trim() || "",
@@ -25,6 +26,45 @@ const transformRestaurants = (rawData) =>
             };
         });
 
+let allRestaurantsCache = null;
+let allRestaurantsPromise = null;
+const restaurantsByZipcodeCache = new Map();
+
+const cacheRestaurants = (restaurants) => {
+    allRestaurantsCache = restaurants;
+    restaurantsByZipcodeCache.clear();
+
+    for (const restaurant of restaurants) {
+        const zipcode = restaurant.zipcode;
+        if (!zipcode) continue;
+
+        const cachedList = restaurantsByZipcodeCache.get(zipcode);
+        if (cachedList) {
+            cachedList.push(restaurant);
+        } else {
+            restaurantsByZipcodeCache.set(zipcode, [restaurant]);
+        }
+    }
+
+    return restaurants;
+};
+
+const getAllRestaurants = async () => {
+    if (allRestaurantsCache) return allRestaurantsCache;
+
+    if (!allRestaurantsPromise) {
+        allRestaurantsPromise = restaurantService
+            .getAll()
+            .then(transformRestaurants)
+            .then(cacheRestaurants)
+            .finally(() => {
+                allRestaurantsPromise = null;
+            });
+    }
+
+    return allRestaurantsPromise;
+};
+
 export const useRestaurants = () => {
     const [state, setState] = useState({
         restaurants: [],
@@ -32,11 +72,69 @@ export const useRestaurants = () => {
         error: null
     });
 
-    const fetchByZipcode = useCallback(async (zipcode) => {
+    const fetchAll = useCallback(async () => {
+        if (allRestaurantsCache) {
+            startTransition(() => {
+                setState({
+                    restaurants: allRestaurantsCache,
+                    loading: false,
+                    error: null
+                });
+            });
+            return;
+        }
+
         setState(prev => ({ ...prev, loading: true, error: null }));
         try {
+            const restaurants = await getAllRestaurants();
+            startTransition(() => {
+                setState({
+                    restaurants,
+                    loading: false,
+                    error: null
+                });
+            });
+        } catch (err) {
+            console.error("Failed to load all restaurants:", err);
+            setState(prev => ({
+                ...prev,
+                loading: false,
+                error: "Failed to load the full restaurant map."
+            }));
+        }
+    }, []);
+
+    const fetchByZipcode = useCallback(async (zipcode) => {
+        if (restaurantsByZipcodeCache.has(zipcode)) {
+            startTransition(() => {
+                setState({
+                    restaurants: restaurantsByZipcodeCache.get(zipcode),
+                    loading: false,
+                    error: null
+                });
+            });
+            return;
+        }
+
+        setState(prev => ({ ...prev, loading: true, error: null }));
+        try {
+            if (allRestaurantsCache) {
+                const restaurants = allRestaurantsCache.filter(restaurant =>
+                    restaurant.zipcode === zipcode
+                );
+                restaurantsByZipcodeCache.set(zipcode, restaurants);
+                startTransition(() => {
+                    setState({ restaurants, loading: false, error: null });
+                });
+                return;
+            }
+
             const rawData = await restaurantService.getByZipcode(zipcode);
-            setState({ restaurants: transformRestaurants(rawData), loading: false, error: null });
+            const restaurants = transformRestaurants(rawData);
+            restaurantsByZipcodeCache.set(zipcode, restaurants);
+            startTransition(() => {
+                setState({ restaurants, loading: false, error: null });
+            });
         } catch (err) {
             console.error("Failed to load restaurants:", err);
             setState({
@@ -47,5 +145,5 @@ export const useRestaurants = () => {
         }
     }, []);
 
-    return { ...state, fetchByZipcode };
+    return { ...state, fetchAll, fetchByZipcode };
 };
