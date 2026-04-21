@@ -2,7 +2,7 @@ import { useState } from "react";
 import NewMenu from "./NewMenu";
 
 const UploadMenu = ({ restaurantId }) => {
-    const [result, setResult] = useState(null);
+    const [items, setItems] = useState(null);
     const onSubmit = async (e) => {
         e.preventDefault(); // prevents form default submission behavior
         const menu = document.getElementById("menu");
@@ -31,7 +31,8 @@ const UploadMenu = ({ restaurantId }) => {
             );
             if (resp.ok) {
                 console.log("ok");
-                setResult(await resp.json());
+                data = await resp.json();
+                setItems(data["menu_items"]);
             }
             if (!resp.ok) {
                 const errorData = await resp.json().catch(() => ({}));
@@ -45,9 +46,9 @@ const UploadMenu = ({ restaurantId }) => {
         }
     };
 
-    if (result) {
+    if (items) {
         console.log("result is");
-        console.log(result);
+        console.log(items);
     } else {
         console.log("no result");
     }
@@ -65,8 +66,12 @@ const UploadMenu = ({ restaurantId }) => {
                 <button type="submit">Submit</button>
             </form>
             {/* some form that has all the stuff*/}
-            {result && (
-                <NewMenu restaurantId={restaurantId} menuData={result} />
+            {items && (
+                <NewMenu
+                    restaurantId={restaurantId}
+                    items={items}
+                    setItems={setItems}
+                />
             )}
         </>
     );
