@@ -19,9 +19,9 @@ const MainLayout = ({ children }) => {
         } catch (err) {
             console.warn("Logout failed, cleaning up local storage anyway.");
         }
-        localStorage.clear();
-        window.location.href = "/login";
-    };
+        localStorage.removeItem("sessionId");
+        localStorage.removeItem("userId");
+        navigate("/login");    };
 
 
     return (
