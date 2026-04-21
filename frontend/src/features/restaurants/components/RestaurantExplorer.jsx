@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRestaurants } from '../hooks/useRestaurants';
 import { useLocationSearch } from '../../common/useLocationSearch';
 import ZipSearchInput from '../../common/components/ZipSearchInput';
+import '../../common/components/explorer.css';
 import RestaurantMap from './RestaurantMap';
 import './restaurants.css';
 
@@ -25,7 +26,8 @@ const RestaurantExplorer = () => {
         setZipError = () => {},
         geoLoading = false, 
         handleZipChange = () => {}, 
-        handleMyLocation = () => {}
+        handleMyLocation = () => {},
+        commitZip = () => {}
     } = locationSearch;
 
     useEffect(() => {
@@ -41,6 +43,7 @@ const RestaurantExplorer = () => {
             return;
         }
         setZipError("");
+        commitZip(currentZip);
         if (fetchByZipcode) fetchByZipcode(currentZip);
     };
 
@@ -79,7 +82,8 @@ const RestaurantExplorer = () => {
                 />
             </div>
 
-            {/* Map Frame */}
+            <p className="restaurant-map-hint">Double-click a pin to view restaurant details.</p>
+
             <div className="map-frame" style={{ position: 'relative' }}>
                 {loading && (
                     <div className="map-loading-overlay">

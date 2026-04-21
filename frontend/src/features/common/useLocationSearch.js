@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback} from 'react';
+import { startTransition, useState, useRef, useCallback} from 'react';
 
 export const useLocationSearch = (onLocationFound) => {
     const inputRef = useRef(null);
@@ -13,14 +13,19 @@ export const useLocationSearch = (onLocationFound) => {
 
         if (debounceRef.current) clearTimeout(debounceRef.current);
 
-        if (cleanZip.length === 5) {
-            setCommittedZip(cleanZip);
-        } else if (cleanZip.length === 0) {
+        if (cleanZip.length === 0) {
             debounceRef.current = setTimeout(() => setCommittedZip(""), 0);
         }
         
         if (zipError) setZipError("");
     };
+
+    const commitZip = useCallback((zip) => {
+        const cleanZip = (zip || "").replace(/\D/g, '').slice(0, 5);
+        startTransition(() => {
+            setCommittedZip(cleanZip);
+        });
+    }, []);
 
     const handleMyLocation = () => {
         if (!navigator.geolocation) return alert("Geolocation not supported.");
@@ -48,6 +53,6 @@ export const useLocationSearch = (onLocationFound) => {
     }, []);
 
     return { 
-        inputRef, committedZip, zipError, setZipError, geoLoading, handleZipChange, handleMyLocation, resetZip 
+        inputRef, committedZip, zipError, setZipError, geoLoading, handleZipChange, handleMyLocation, resetZip, commitZip
     };
 };

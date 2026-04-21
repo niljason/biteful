@@ -3,6 +3,7 @@ import { usePantries } from '../hooks/usePantries';
 import PantryMap from './PantryMap';
 import { useLocationSearch } from '../../common/useLocationSearch'
 import ZipSearchInput from '../../common/components/ZipSearchInput';
+import '../../common/components/explorer.css';
 import './pantries.css';
 
 const DAYS_OF_WEEK = [
@@ -29,7 +30,8 @@ const PantryExplorer = () => {
         geoLoading, 
         handleZipChange, 
         handleMyLocation, 
-        resetZip
+        resetZip,
+        commitZip
 
     } = useLocationSearch((coords) => setMapTarget(coords));
 
@@ -113,6 +115,7 @@ const PantryExplorer = () => {
         }
 
         setZipError("");
+        commitZip(currentZip);
         const match = processedGroups.find((group) => group.zipcode === currentZip);
 
         if (match) {

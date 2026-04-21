@@ -1,0 +1,123 @@
+.restaurant-page-container,
+.pantry-page-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pantry-search-title {
+  display: block;
+  margin-bottom: 8px;
+  color: #2d0066;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pantry-input-wrapper,
+.pantry-search-button-sq,
+.pantry-geo-button-sq {
+  display: flex;
+  align-items: center;
+}
+
+.pantry-input-wrapper,
+.map-frame,
+.pantry-zip-input {
+  width: 100%;
+}
+
+.pantry-input-wrapper {
+  background: #fff;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.pantry-search-button-sq,
+.pantry-geo-button-sq {
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.pantry-search-button-sq {
+  width: 34px;
+  height: 34px;
+  background: #8b3dff;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.pantry-geo-button-sq {
+  width: 48px;
+  height: 48px;
+  background: transparent !important;
+}
+
+.pantry-zip-input {
+  min-width: 0;
+  padding: 8px 12px;
+  border: 0 !important;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #8b3dff;
+}
+
+.pantry-zip-input::placeholder {
+  color: #c2b2ff;
+}
+
+.pantry-zip-error {
+  margin: 6px 0 0;
+  color: #de4a4a;
+  font-size: 0.8rem;
+}
+
+.map-frame {
+  height: 600px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.geo-icon-svg,
+.pantry-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+.geo-icon-svg {
+  color: #007aff;
+}
+
+.pantry-spinner {
+  border: 2px solid transparent;
+  border-top: 2px solid #007aff;
+  border-radius: 50%;
+  display: block;
+  box-sizing: border-box;
+  animation: pantry-rotation 0.8s linear infinite;
+}
+
+@keyframes pantry-rotation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pantry-geo-button-sq.is-loading {
+  cursor: default;
+}

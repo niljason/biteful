@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,7 @@ const MapRecenter = ({ target }) => {
 
 const RestaurantMap = ({ restaurants = [], target }) => {
     const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
+    const markerRefs = useRef(new Map());
 
     const validRestaurants = useMemo(() => {
         return (restaurants || []).filter(res => 
@@ -37,6 +38,19 @@ const RestaurantMap = ({ restaurants = [], target }) => {
         }));
     }, [validRestaurants]);
 
+    useEffect(() => {
+        if (!selectedRestaurantId) return;
+
+        const selectedMarker = markerRefs.current.get(selectedRestaurantId);
+        if (!selectedMarker) return;
+
+        const frameId = requestAnimationFrame(() => {
+            selectedMarker.openPopup();
+        });
+
+        return () => cancelAnimationFrame(frameId);
+    }, [selectedRestaurantId]);
+
     return (
         <BaseMap>
             <MapRecenter target={target} />
@@ -50,16 +64,24 @@ const RestaurantMap = ({ restaurants = [], target }) => {
                 animateAddingMarkers={false}
                 showCoverageOnHover={false}
                 maxClusterRadius={20}
-                disableClusteringAtZoom={17}
                 spiderfyOnMaxZoom={true}
+                spiderfyDistanceMultiplier={2.5}
+                zoomToBoundsOnClick={false}
             >
                 {markerData.map((restaurant) => (
                     <Marker 
                         key={restaurant.markerKey}
                         position={restaurant.position}
                         icon={purpleIcon}
+                        ref={(markerInstance) => {
+                            if (markerInstance) {
+                                markerRefs.current.set(restaurant.markerKey, markerInstance);
+                            } else {
+                                markerRefs.current.delete(restaurant.markerKey);
+                            }
+                        }}
                         eventHandlers={{
-                            click: () => setSelectedRestaurantId(restaurant.markerKey),
+                            dblclick: () => setSelectedRestaurantId(restaurant.markerKey),
                             popupclose: () => setSelectedRestaurantId((currentId) => (
                                 currentId === restaurant.markerKey ? null : currentId
                             )),
