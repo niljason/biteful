@@ -9,14 +9,16 @@ import SignupForm from "./features/users/components/SignupForm";
 import Dashboard from "./features/users/components/Dashboard";
 import PantryExplorer from "./features/pantries/components/PantryExplorer";
 import Restaurant from "./features/restaurants/components/Restaurant";
+import Profile from "./features/users/components/Profile";
 import RestaurantExplorer from "./features/restaurants/components/RestaurantExplorer";
 import MenuViewer from "./features/menus/components/MenuViewer";
 import MenuUploader from "./features/menus/components/MenuUploader";
 
 const isAuthenticated = () => {
     if (localStorage.getItem("sessionId") === null) {
-        throw redirect("/login");
+        return redirect("/login");
     }
+    return null;
 };
 
 const router = createBrowserRouter([
@@ -27,7 +29,7 @@ const router = createBrowserRouter([
                 <Dashboard />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
     },
     {
         path: "/login",
@@ -52,7 +54,7 @@ const router = createBrowserRouter([
                 <Dashboard />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
     },
     {
         path: "/map/pantry",
@@ -61,7 +63,7 @@ const router = createBrowserRouter([
                 <PantryExplorer />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
     },
     {
         path: "/ocr",
@@ -70,7 +72,16 @@ const router = createBrowserRouter([
                 <Restaurant />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
+    },
+    {
+        path: "/profile",
+        element: (
+            <MainLayout>
+                <Profile />
+            </MainLayout>
+        ),
+        loader: isAuthenticated,
     },
     {
         path: "/:camis/menu",
@@ -79,7 +90,7 @@ const router = createBrowserRouter([
                 <MenuViewer />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
     },
     {
         path: "/:camis/menu/upload",
@@ -88,7 +99,7 @@ const router = createBrowserRouter([
                 <MenuUploader />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
     },
     {
         path: "/map/restaurant",
@@ -97,7 +108,7 @@ const router = createBrowserRouter([
                 <RestaurantExplorer />
             </MainLayout>
         ),
-        middleware: [isAuthenticated],
+        loader: isAuthenticated,
     }
 ]);
 
