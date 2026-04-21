@@ -5,8 +5,7 @@ import './Profile.css';
 const Profile = () => {
     const [user, setUser] = useState(null);
     const [error, setError] = useState(null);
-    
-    // Edit state
+   
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         display_name: '',

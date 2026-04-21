@@ -55,10 +55,23 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
 void User::getOne(const HttpRequestPtr& req,
                  std::function<void(const HttpResponsePtr&)>&& callback,
                  std::string&& id) {
+    
+    char* end;
+
+    // validation
+    std::strtol(id.c_str(), &end, 10);
+    if (*end != '\0' || id.empty()) {
+        Json::Value ret;
+        ret["error"] = "Invalid user ID";
+        auto resp = HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(k400BadRequest);
+        callback(resp);
+        return;
+    }
+
     auto dbClient = app().getDbClient();
     std::string userId = id;
 
-    // 1. Fetch User Profile
     dbClient->execSqlAsync(
         "SELECT id, username, email, phone, display_name, dietary_preferences, health_score "
         "FROM users WHERE id = $1",
@@ -79,7 +92,7 @@ void User::getOne(const HttpRequestPtr& req,
             user["dietary_preferences"] = res[0]["dietary_preferences"].isNull() ? "" : res[0]["dietary_preferences"].as<std::string>();
             user["health_score"]        = res[0]["health_score"].isNull() ? 0 : res[0]["health_score"].as<int>();
 
-            // 2. Fetch Aggregated Stats (FIXED WITH JOIN)
+            // fetch Aggregated Stats (FIXED WITH JOIN)
             dbClient->execSqlAsync(
                 "SELECT "
                 "COALESCE(SUM(CASE WHEN fi.health_points > 0 THEN fi.health_points ELSE 0 END), 0) AS healthy_sum, "
@@ -91,7 +104,7 @@ void User::getOne(const HttpRequestPtr& req,
                     user["stats"]["healthy"]   = stats[0]["healthy_sum"].as<int>();
                     user["stats"]["unhealthy"] = stats[0]["unhealthy_sum"].as<int>();
 
-                    // 3. Fetch Recent Activity (FIXED WITH JOIN)
+                    // fetch Recent Activity (FIXED WITH JOIN)
                     dbClient->execSqlAsync(
                         "SELECT fi.dish_name AS item_name, fi.health_points, fl.logged_at::text "
                         "FROM food_logs fl "
@@ -153,7 +166,7 @@ void User::updateOne(const HttpRequestPtr& req, std::function<void(const HttpRes
 
     std::string displayName = json->get("display_name", "").asString();
     std::string dietaryPrefs = json->get("dietary_preferences", "").asString();
-    std::string phone = json->get("phone", "").asString(); // <--- ADD THIS
+    std::string phone = json->get("phone", "").asString();
 
     auto dbClient = app().getDbClient();
     
@@ -213,13 +226,13 @@ void User::logFood(const HttpRequestPtr& req,
     try {
         auto trans = dbClient->newTransaction();
 
-        // 1. Insert log
+        // insert log
         trans->execSqlSync(
             "INSERT INTO food_logs (user_id, food_item_id) VALUES ($1, $2)",
             userId, foodItemId
         );
 
-        // 2. Update health score
+        // update health score
         trans->execSqlSync(
             "UPDATE users SET health_score = health_score + "
             "COALESCE((SELECT health_points FROM food_items WHERE id = $1), 0) "

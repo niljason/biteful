@@ -47,7 +47,7 @@ section {
   border-radius: var(--border-radius-lg);
   padding: 20px;
   box-shadow: var(--bold-shadow);
-  margin-bottom: 30px; /* Consistent spacing between blocks */
+  margin-bottom: 30px;
 }
 
 /* --- Identity Section --- */
@@ -216,7 +216,7 @@ section {
 }
 
 .save-btn:hover {
-  background-color: #9d59ff; /* Slightly lighter purple on hover */
+  background-color: #9d59ff; 
 }
 
 .save-btn:active {
