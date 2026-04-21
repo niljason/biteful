@@ -1,12 +1,5 @@
 import { useState, useRef, useCallback} from 'react';
 
-const ZIP_CODE_PATTERN = /^\d{5}$/;
-
-export const extractZipCode = (address = '') => {
-    const match = address.trim().match(/\d{5}$/);
-    return match ? match[0] : '';
-};
-
 export const useLocationSearch = (onLocationFound) => {
     const inputRef = useRef(null);
     const debounceRef = useRef(null);
@@ -41,7 +34,8 @@ export const useLocationSearch = (onLocationFound) => {
             () => {
                 setGeoLoading(false);
                 alert("Location access denied.");
-            }
+            }, 
+            { enableHighAccuracy: true }
         );
     };
 

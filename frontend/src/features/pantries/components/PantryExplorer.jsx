@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { usePantries } from '../hooks/usePantries';
 import PantryMap from './PantryMap';
-import { useLocationSearch, extractZipCode } from '../../common/useLocationSearch'
+import { useLocationSearch } from '../../common/useLocationSearch'
 import ZipSearchInput from '../../common/components/ZipSearchInput';
 import './pantries.css';
 
@@ -35,15 +35,24 @@ const PantryExplorer = () => {
 
     const processedGroups = useMemo(() => {
         return (groups || []).map(group => {
-            // Extract ZIP once per group
-            const zip = extractZipCode(group.address);
-            
+            // addr1, addr2, addr3 usually form the street/city portion
+            const streetAddress = [
+                group.building, // addr1
+                group.street,   // addr2
+                group.boro      // addr3
+            ].filter(Boolean).join(', ');
+
+            const fullAddress = streetAddress 
+                ? `${streetAddress} ${group.zipcode || ''}`.trim()
+                : (group.zipcode || '');
+
             return {
                 ...group,
-                extractedZip: zip,
+                fullAddress, 
+                zipcode: group.zipcode ? String(group.zipcode).trim() : '',
                 cleanPrograms: (group.programs || []).map(p => ({
                     ...p,
-                    cleanType: p.program?.trim() || '',
+                    cleanType: (p.program || '').trim(),
                     day: p.day_of_week
                 }))
             };
@@ -73,7 +82,8 @@ const PantryExplorer = () => {
     const filteredGroups = useMemo(() => {
         return processedGroups.filter((group) => {
             if (committedZip.length === 5) {
-                if (group.extractedZip !== committedZip) return false;
+                console.log(`Checking Input: "${committedZip}" against Data: "${group.zipcode}"`);
+                if (group.zipcode !== committedZip) return false;
             }
 
             if (selectedDays.length > 0) {
@@ -103,7 +113,7 @@ const PantryExplorer = () => {
         }
 
         setZipError("");
-        const match = processedGroups.find((group) => group.extractedZip === currentZip);
+        const match = processedGroups.find((group) => group.zipcode === currentZip);
 
         if (match) {
             setMapTarget({ lat: match.latitude, lng: match.longitude });

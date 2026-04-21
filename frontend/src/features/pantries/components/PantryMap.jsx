@@ -49,18 +49,25 @@ const PantryMap = ({ pantries = [], target }) => {
           return acc;
         }, {});
 
+        const displayAddress = [
+            group.building,
+            group.street,
+            group.boro,
+            group.zipcode
+        ].filter(Boolean).join(', ');
+
         return (
           <Marker key={group.id} position={[group.latitude, group.longitude]} icon={purpleIcon}>
             <Popup>
               <div className="pantry-popup-container">
                 <h3>{group.agency}</h3>
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(group.address)}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayAddress)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="pantry-address-link"
                 >
-                  {group.address}
+                  {displayAddress}
                 </a>
                 <a
                   href={`tel:${group.phone?.replace(/\D/g, '')}`}
