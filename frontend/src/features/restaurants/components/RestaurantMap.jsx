@@ -1,142 +1,229 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Marker, Popup } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-cluster';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useMap } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
+import L from 'leaflet';
+import 'leaflet.markercluster';
 import BaseMap, { purpleIcon } from '../../common/components/BaseMap';
 import 'leaflet/dist/leaflet.css';
 
-const RestaurantMap = ({ restaurants = [], target }) => {
-    const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
-    const markerRefs = useRef(new Map());
+const buildPopupContent = (restaurant, onNavigate) => {
+    const container = document.createElement('div');
+    container.className = 'rpc';
 
-    const validRestaurants = useMemo(() => {
-        return (restaurants || []).filter(res => 
-            res && 
-            res.latitude != null && 
-            res.longitude != null &&
-            !isNaN(Number(res.latitude)) &&
-            !isNaN(Number(res.longitude))
+    const title = document.createElement('h3');
+    title.className = 'rpc-name';
+    title.textContent = restaurant.name || 'Unknown Restaurant';
+    container.appendChild(title);
+
+    if (restaurant.phone) {
+        const phoneLink = document.createElement('a');
+        phoneLink.href = `tel:${restaurant.phone.replace(/\D/g, '')}`;
+        phoneLink.className = 'rpc-phone';
+        phoneLink.textContent = restaurant.phone;
+        container.appendChild(phoneLink);
+    }
+
+    if (restaurant.address) {
+        const addressLink = document.createElement('a');
+        addressLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`;
+        addressLink.target = '_blank';
+        addressLink.rel = 'noopener noreferrer';
+        addressLink.className = 'rpc-address';
+        addressLink.title = 'Open in Maps';
+        addressLink.textContent = restaurant.address;
+        container.appendChild(addressLink);
+    }
+
+    if (restaurant.cuisine || restaurant.grade) {
+        const meta = document.createElement('div');
+        meta.className = 'rpc-meta';
+
+        if (restaurant.cuisine) {
+            const cuisineGroup = document.createElement('div');
+            cuisineGroup.className = 'rpc-category-group';
+
+            const cuisineLabel = document.createElement('span');
+            cuisineLabel.className = 'rpc-category-label';
+            cuisineLabel.textContent = 'Cuisine';
+
+            const cuisineValue = document.createElement('div');
+            cuisineValue.className = 'rpc-detail-row';
+            cuisineValue.textContent = restaurant.cuisine;
+
+            cuisineGroup.append(cuisineLabel, cuisineValue);
+            meta.appendChild(cuisineGroup);
+        }
+
+        if (restaurant.grade) {
+            const gradeGroup = document.createElement('div');
+            gradeGroup.className = 'rpc-category-group';
+
+            const gradeLabel = document.createElement('span');
+            gradeLabel.className = 'rpc-category-label';
+            gradeLabel.textContent = 'Grade';
+
+            const gradeValue = document.createElement('div');
+            gradeValue.className = 'rpc-detail-row';
+            gradeValue.textContent = restaurant.grade;
+
+            gradeGroup.append(gradeLabel, gradeValue);
+            meta.appendChild(gradeGroup);
+        }
+
+        container.appendChild(meta);
+    }
+
+    const links = document.createElement('div');
+    links.className = 'rpc-links';
+
+    const viewMenuLink = document.createElement('button');
+    viewMenuLink.type = 'button';
+    viewMenuLink.className = 'rpc-action-link';
+    viewMenuLink.textContent = 'View Menu';
+    viewMenuLink.dataset.action = 'view-menu';
+
+    const uploadMenuLink = document.createElement('button');
+    uploadMenuLink.type = 'button';
+    uploadMenuLink.className = 'rpc-action-link';
+    uploadMenuLink.textContent = 'Upload Menu';
+    uploadMenuLink.dataset.action = 'upload-menu';
+
+    const state = {
+        name: restaurant.name,
+        address: restaurant.address,
+        phone: restaurant.phone,
+    };
+
+    viewMenuLink.onclick = () => onNavigate(`/${restaurant.id}/menu`, state);
+    uploadMenuLink.onclick = () => onNavigate(`/${restaurant.id}/menu/upload`, state);
+
+    links.append(viewMenuLink, uploadMenuLink);
+    container.appendChild(links);
+
+    return container;
+};
+
+const createRestaurantMarker = (restaurant, onNavigate) => {
+    const marker = L.marker([Number(restaurant.latitude), Number(restaurant.longitude)], {
+        icon: purpleIcon,
+    });
+
+    marker.on('popupopen', () => {
+        if (marker.getPopup()) return;
+        marker.bindPopup(buildPopupContent(restaurant, onNavigate), { className: 'rpc-popup' });
+        marker.openPopup();
+    });
+
+    marker.on('click', () => {
+        if (!marker.getPopup()) {
+            marker.bindPopup(buildPopupContent(restaurant, onNavigate), { className: 'rpc-popup' });
+        }
+    });
+
+    return marker;
+};
+
+const RestaurantClusterLayer = ({ restaurants = [], visibleRestaurantIds }) => {
+    const map = useMap();
+    const navigate = useNavigate();
+    const clusterGroupRef = useRef(null);
+    const markerByIdRef = useRef(new Map());
+    const visibleMarkerIdsRef = useRef(new Set());
+
+    const normalizedRestaurants = useMemo(() => {
+        return (restaurants || []).filter((restaurant) =>
+            restaurant &&
+            restaurant.id &&
+            restaurant.latitude != null &&
+            restaurant.longitude != null &&
+            !Number.isNaN(Number(restaurant.latitude)) &&
+            !Number.isNaN(Number(restaurant.longitude))
         );
     }, [restaurants]);
 
-    const markerData = useMemo(() => {
-        return validRestaurants.map((restaurant, index) => ({
-            ...restaurant,
-            markerKey: restaurant.id || `res-${index}`,
-            position: [Number(restaurant.latitude), Number(restaurant.longitude)],
-        }));
-    }, [validRestaurants]);
-
     useEffect(() => {
-        if (!selectedRestaurantId) return;
+        if (clusterGroupRef.current) return;
 
-        const selectedMarker = markerRefs.current.get(selectedRestaurantId);
-        if (!selectedMarker) return;
-
-        const frameId = requestAnimationFrame(() => {
-            selectedMarker.openPopup();
+        const clusterGroup = L.markerClusterGroup({
+            chunkedLoading: true,
+            chunkInterval: 120,
+            chunkDelay: 40,
+            removeOutsideVisibleBounds: true,
+            animate: false,
+            animateAddingMarkers: false,
+            showCoverageOnHover: false,
+            maxClusterRadius: 20,
+            spiderfyOnMaxZoom: true,
+            spiderfyDistanceMultiplier: 2.5,
+            zoomToBoundsOnClick: false,
         });
 
-        return () => cancelAnimationFrame(frameId);
-    }, [selectedRestaurantId]);
+        clusterGroupRef.current = clusterGroup;
+        map.addLayer(clusterGroup);
 
+        return () => {
+            map.removeLayer(clusterGroup);
+            clusterGroupRef.current = null;
+        };
+    }, [map]);
+
+    useEffect(() => {
+        const clusterGroup = clusterGroupRef.current;
+        if (!clusterGroup) return;
+
+        clusterGroup.clearLayers();
+        markerByIdRef.current.clear();
+        visibleMarkerIdsRef.current = new Set();
+
+        for (const restaurant of normalizedRestaurants) {
+            const marker = createRestaurantMarker(restaurant, (path, state) => {
+                navigate(path, { state });
+            });
+
+            markerByIdRef.current.set(restaurant.id, marker);
+        }
+    }, [navigate, normalizedRestaurants]);
+
+    useEffect(() => {
+        const clusterGroup = clusterGroupRef.current;
+        if (!clusterGroup) return;
+
+        const nextVisibleIds = visibleRestaurantIds || new Set();
+        const nextVisibleMarkers = [];
+
+        clusterGroup.clearLayers();
+
+        for (const id of nextVisibleIds) {
+            const marker = markerByIdRef.current.get(id);
+            if (marker) {
+                nextVisibleMarkers.push(marker);
+            }
+        }
+
+        if (nextVisibleMarkers.length > 0) {
+            clusterGroup.addLayers(nextVisibleMarkers);
+        }
+
+        visibleMarkerIdsRef.current = new Set(nextVisibleIds);
+    }, [normalizedRestaurants, visibleRestaurantIds]);
+
+    useEffect(() => {
+        return () => {
+            markerByIdRef.current.clear();
+            visibleMarkerIdsRef.current.clear();
+        };
+    }, []);
+
+    return null;
+};
+
+const RestaurantMap = ({ restaurants = [], visibleRestaurantIds, target }) => {
     return (
         <BaseMap target={target}>
-            <MarkerClusterGroup
-                chunkedLoading={true}
-                chunkInterval={120}
-                chunkDelay={40}
-                removeOutsideVisibleBounds={true}
-                animate={false}
-                animateAddingMarkers={false}
-                showCoverageOnHover={false}
-                maxClusterRadius={20}
-                spiderfyOnMaxZoom={true}
-                spiderfyDistanceMultiplier={2.5}
-                zoomToBoundsOnClick={false}
-            >
-                {markerData.map((restaurant) => (
-                    <Marker 
-                        key={restaurant.markerKey}
-                        position={restaurant.position}
-                        icon={purpleIcon}
-                        ref={(markerInstance) => {
-                            if (markerInstance) {
-                                markerRefs.current.set(restaurant.markerKey, markerInstance);
-                            } else {
-                                markerRefs.current.delete(restaurant.markerKey);
-                            }
-                        }}
-                        eventHandlers={{
-                            click: () => setSelectedRestaurantId(restaurant.markerKey),
-                            popupclose: () => setSelectedRestaurantId((currentId) => (
-                                currentId === restaurant.markerKey ? null : currentId
-                            )),
-                        }}
-                    >
-                        {selectedRestaurantId === restaurant.markerKey && (
-                            <Popup className="rpc-popup">
-                                <div className="rpc">
-                                    <h3 className="rpc-name">{restaurant.name || 'Unknown Restaurant'}</h3>
-
-                                    {restaurant.phone && (
-                                        <a
-                                            href={`tel:${restaurant.phone.replace(/\D/g, '')}`}
-                                            className="rpc-phone"
-                                        >
-                                            {restaurant.phone}
-                                        </a>
-                                    )}
-
-                                    {restaurant.address && (
-                                        <a
-                                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="rpc-address"
-                                            title="Open in Maps"
-                                        >
-                                            {restaurant.address}
-                                        </a>
-                                    )}
-
-                                    {(restaurant.cuisine || restaurant.grade) && (
-                                        <div className="rpc-meta">
-                                            {restaurant.cuisine && (
-                                                <div className="rpc-category-group">
-                                                    <span className="rpc-category-label">Cuisine</span>
-                                                    <div className="rpc-detail-row">{restaurant.cuisine}</div>
-                                                </div>
-                                            )}
-                                            {restaurant.grade && (
-                                                <div className="rpc-category-group">
-                                                    <span className="rpc-category-label">Grade</span>
-                                                    <div className="rpc-detail-row">{restaurant.grade}</div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <div className="rpc-links">
-                                        <Link 
-                                            to={`/${restaurant.id}/menu`} 
-                                            state={{ name: restaurant.name, address: restaurant.address, phone: restaurant.phone }}
-                                        >
-                                            View Menu
-                                        </Link>
-                                        <Link 
-                                            to={`/${restaurant.id}/menu/upload`} 
-                                            state={{ name: restaurant.name, address: restaurant.address, phone: restaurant.phone }}
-                                        >
-                                            Upload Menu
-                                        </Link>
-                                    </div>
-                                </div>
-                            </Popup>
-                        )}
-                    </Marker>
-                ))}
-            </MarkerClusterGroup>
+            <RestaurantClusterLayer
+                restaurants={restaurants}
+                visibleRestaurantIds={visibleRestaurantIds}
+            />
         </BaseMap>
     );
 };
