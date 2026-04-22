@@ -62,7 +62,6 @@ const NewMenu = ({ restaurantId, items, setItems }) => {
             method: "POST",
             body: JSON.stringify({
                 restaurantId,
-                userId: localStorage.getItem("userId"),
             }),
             credentials: "include",
         });
