@@ -6,6 +6,8 @@ import '../../common/components/explorer.css';
 import RestaurantMap from './RestaurantMap';
 import './restaurants.css';
 
+const SCHEDULE_FETCH_DELAY_MS = 180;
+
 const RestaurantExplorer = () => {
     const { 
         restaurants = [], 
@@ -18,7 +20,7 @@ const RestaurantExplorer = () => {
     const [mapTarget, setMapTarget] = useState(null);
 
     const locationSearch = useLocationSearch((coords) => setMapTarget(coords)) || {};
-    
+
     const { 
         inputRef, 
         committedZip = "",
@@ -31,9 +33,34 @@ const RestaurantExplorer = () => {
     } = locationSearch;
 
     useEffect(() => {
-        if (fetchAll) {
+        if (!fetchAll) return;
+
+        let timeoutId = null;
+        let idleId = null;
+        let cancelled = false;
+
+        const startFetch = () => {
+            if (cancelled) return;
             fetchAll();
+        };
+
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            idleId = window.requestIdleCallback(startFetch, { timeout: 1000 });
+        } else {
+            timeoutId = window.setTimeout(startFetch, SCHEDULE_FETCH_DELAY_MS);
         }
+
+        return () => {
+            cancelled = true;
+
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
+            }
+
+            if (idleId !== null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+                window.cancelIdleCallback(idleId);
+            }
+        };
     }, [fetchAll]);
 
     const handleSearch = () => {
