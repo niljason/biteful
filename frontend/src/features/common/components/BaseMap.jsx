@@ -15,7 +15,7 @@ function MapUpdater({ target }) {
 }
 
 const DEFAULT_CLUSTER_OPTIONS = {
-  chunkedLoading: true,
+  chunkedLoading: false,
   chunkInterval: 120,
   chunkDelay: 40,
   removeOutsideVisibleBounds: true,
@@ -76,24 +76,7 @@ export const ClusteredMarkerLayer = ({
   );
 
   useEffect(() => {
-    if (clusterGroupRef.current) return;
-
-    const clusterGroup = L.markerClusterGroup(clusterOptions);
-    clusterGroupRef.current = clusterGroup;
-    map.addLayer(clusterGroup);
-
-    return () => {
-      map.removeLayer(clusterGroup);
-      clusterGroupRef.current = null;
-    };
-  }, [clusterOptions, map]);
-
-  useEffect(() => {
-    const clusterGroup = clusterGroupRef.current;
-    if (!clusterGroup) return;
-
-    clusterGroup.clearLayers();
-    if (normalizedItems.length === 0) return;
+    const nextClusterGroup = L.markerClusterGroup(clusterOptions);
 
     const markers = normalizedItems.map((item) => {
       const marker = L.marker(getPosition(item).map(Number), { icon });
@@ -101,8 +84,32 @@ export const ClusteredMarkerLayer = ({
       return marker;
     });
 
-    clusterGroup.addLayers(markers);
-  }, [buildPopupContent, getPosition, icon, normalizedItems, popupClassName]);
+    if (markers.length > 0) {
+      // Build the cluster tree before attaching it to the map so the plugin
+      // cannot continue chunk-processing after React has removed the layer.
+      nextClusterGroup.addLayers(markers);
+    }
+
+    const previousClusterGroup = clusterGroupRef.current;
+    clusterGroupRef.current = nextClusterGroup;
+    map.addLayer(nextClusterGroup);
+
+    if (previousClusterGroup) {
+      previousClusterGroup.clearLayers();
+      map.removeLayer(previousClusterGroup);
+    }
+
+    return () => {
+      nextClusterGroup.clearLayers();
+      if (map.hasLayer(nextClusterGroup)) {
+        map.removeLayer(nextClusterGroup);
+      }
+
+      if (clusterGroupRef.current === nextClusterGroup) {
+        clusterGroupRef.current = null;
+      }
+    };
+  }, [buildPopupContent, clusterOptions, getPosition, icon, map, normalizedItems, popupClassName]);
 
   return null;
 };

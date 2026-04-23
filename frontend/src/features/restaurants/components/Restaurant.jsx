@@ -1,7 +1,4 @@
-import { useState } from "react";
-
 const Restaurant = () => {
-    const [result, setResult] = useState(null);
     const onSubmit = async (e) => {
         e.preventDefault(); // prevents form default submission behavior
         const menu = document.getElementById("menu");
@@ -23,33 +20,20 @@ const Restaurant = () => {
             body: data,
             method: "POST",
         };
-        try {
-            const resp = await fetch(
-                import.meta.env.VITE_API_BASE_URL + "ocr/",
-                config,
+        const resp = await fetch(
+            import.meta.env.VITE_API_BASE_URL + "ocr/",
+            config,
+        );
+        if (resp.ok) {
+            await resp.json();
+        }
+        if (!resp.ok) {
+            const errorData = await resp.json().catch(() => ({}));
+            throw new Error(
+                errorData.error || `Server returned ${resp.status}`,
             );
-            if (resp.ok) {
-                console.log("ok");
-                setResult(await resp.json());
-            }
-            if (!resp.ok) {
-                const errorData = await resp.json().catch(() => ({}));
-                throw new Error(
-                    errorData.error || `Server returned ${resp.status}`,
-                );
-            }
-        } catch (err) {
-            console.log(err);
-            throw err;
         }
     };
-
-    if (result) {
-        console.log("result is");
-        console.log(result);
-    } else {
-        console.log("no result");
-    }
     return (
         <form action="POST" onSubmit={onSubmit}>
             <div className="input-group">
