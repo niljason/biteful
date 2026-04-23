@@ -101,16 +101,19 @@ const buildPopupContent = (restaurant, onNavigate) => {
     return container;
 };
 
-const RestaurantMap = ({ restaurants = [], shouldClusterPins = false, target }) => {
+const RestaurantMap = ({ restaurants = [], selectedRestaurant = null, shouldClusterPins = false, target }) => {
     const navigate = useNavigate();
     const buildRestaurantPopup = (restaurant) =>
         buildPopupContent(restaurant, (path, state) => navigate(path, { state }));
+    const clusteredRestaurants = selectedRestaurant
+        ? restaurants.filter((restaurant) => restaurant.id !== selectedRestaurant.id)
+        : restaurants;
 
     return (
         <BaseMap target={target}>
             {shouldClusterPins ? (
                 <ClusteredMarkerLayer
-                    items={restaurants}
+                    items={clusteredRestaurants}
                     getKey={(restaurant) => restaurant.id}
                     getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
                     buildPopupContent={buildRestaurantPopup}
@@ -121,6 +124,16 @@ const RestaurantMap = ({ restaurants = [], shouldClusterPins = false, target }) 
                 <MarkerLayer
                     items={restaurants}
                     getKey={(restaurant) => restaurant.id}
+                    getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
+                    buildPopupContent={buildRestaurantPopup}
+                    popupClassName="rpc-popup"
+                    icon={purpleIcon}
+                />
+            )}
+            {selectedRestaurant && (
+                <MarkerLayer
+                    items={[selectedRestaurant]}
+                    getKey={(restaurant) => `selected-${restaurant.id}`}
                     getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
                     buildPopupContent={buildRestaurantPopup}
                     popupClassName="rpc-popup"

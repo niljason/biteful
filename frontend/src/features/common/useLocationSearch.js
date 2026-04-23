@@ -32,9 +32,12 @@ export const useLocationSearch = (onLocationFound) => {
         setGeoLoading(true);
         try {
             const position = await getCurrentPosition();
-            onLocationFound(getCoordsFromPosition(position));
+            const coords = getCoordsFromPosition(position);
+            onLocationFound(coords);
+            return coords;
         } catch (error) {
             alert(error.message === "Geolocation not supported." ? error.message : "Location access denied.");
+            return null;
         } finally {
             setGeoLoading(false);
         }

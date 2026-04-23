@@ -2,6 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useRestaurants } from '../hooks/useRestaurants';
 import { useLocationSearch } from '../../common/useLocationSearch';
 import ZipSearchInput from '../../common/components/ZipSearchInput';
+import { calculateLinearDistance, formatDistance } from '../../common/utils/locationUtils';
 import '../../common/components/explorer.css';
 import RestaurantMap from './RestaurantMap';
 import './restaurants.css';
@@ -78,9 +79,6 @@ const CUISINE_GROUP_LABEL_BY_EXACT_VALUE = {
     'Juice, Smoothies, Fruit Salads': 'Bakery, Coffee & Desserts',
     'Pancakes/Waffles': 'Bakery, Coffee & Desserts',
     Chicken: 'Fast Food',
-    Hamburgers: 'Fast Food',
-    Hotdogs: 'Fast Food',
-    Sandwiches: 'Fast Food',
     'Bagels/Pretzels': 'Bakery, Coffee & Desserts',
     Vegan: 'Vegetarian & Healthy',
     Vegetarian: 'Vegetarian & Healthy',
@@ -138,8 +136,14 @@ const RestaurantExplorer = () => {
     const [nameQuery, setNameQuery] = useState('');
     const [selectedCuisines, setSelectedCuisines] = useState([]);
     const [selectedGrades, setSelectedGrades] = useState([]);
+    const [userCoords, setUserCoords] = useState(null);
+    const [sortByProximity, setSortByProximity] = useState(false);
+    const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
 
-    const locationSearch = useLocationSearch((coords) => setMapTarget(coords)) || {};
+    const locationSearch = useLocationSearch((coords) => {
+        setMapTarget(coords);
+        setUserCoords(coords);
+    }) || {};
 
     const { 
         inputRef, 
@@ -247,14 +251,42 @@ const RestaurantExplorer = () => {
             return true;
         });
     }, [committedZip, nameQuery, restaurants, selectedCuisines, selectedGrades]);
-    const deferredFilteredRestaurants = useDeferredValue(filteredRestaurants);
+
+    const sortedRestaurants = useMemo(() => {
+        const restaurantsWithDistance = filteredRestaurants.map((restaurant) => ({
+            ...restaurant,
+            distance: calculateLinearDistance(
+                userCoords,
+                { lat: restaurant.latitude, lng: restaurant.longitude },
+                'miles'
+            ),
+        }));
+
+        if (!sortByProximity || !userCoords) {
+            return restaurantsWithDistance;
+        }
+
+        return [...restaurantsWithDistance].sort((a, b) => {
+            if (a.distance == null && b.distance == null) return 0;
+            if (a.distance == null) return 1;
+            if (b.distance == null) return -1;
+            return a.distance - b.distance;
+        });
+    }, [filteredRestaurants, sortByProximity, userCoords]);
+
+    const selectedRestaurant = useMemo(
+        () => sortedRestaurants.find((restaurant) => restaurant.id === selectedRestaurantId) || null,
+        [selectedRestaurantId, sortedRestaurants]
+    );
+
+    const deferredFilteredRestaurants = useDeferredValue(sortedRestaurants);
     const visibleRestaurants = useMemo(() => {
-        if (filteredRestaurants.length <= DEFERRED_CLUSTER_RENDER_THRESHOLD) {
-            return filteredRestaurants;
+        if (sortedRestaurants.length <= DEFERRED_CLUSTER_RENDER_THRESHOLD) {
+            return sortedRestaurants;
         }
 
         return deferredFilteredRestaurants;
-    }, [deferredFilteredRestaurants, filteredRestaurants]);
+    }, [deferredFilteredRestaurants, sortedRestaurants]);
     const shouldClusterPins = visibleRestaurants.length > DIRECT_PIN_RENDER_THRESHOLD;
 
     const clearFilters = () => {
@@ -262,21 +294,44 @@ const RestaurantExplorer = () => {
         setNameQuery('');
         setSelectedCuisines([]);
         setSelectedGrades([]);
+        setSortByProximity(false);
+        setUserCoords(null);
+        setSelectedRestaurantId(null);
         setMapTarget(null);
     };
 
     const derivedMapTarget = useMemo(() => {
         if (mapTarget) return mapTarget;
-        if (loading || filteredRestaurants.length === 0) return null;
+        if (loading || sortedRestaurants.length === 0) return null;
 
-        const first = filteredRestaurants[0];
+        const first = sortedRestaurants[0];
         if (!first?.latitude || !first?.longitude) return null;
 
         return {
             lat: Number(first.latitude),
             lng: Number(first.longitude)
         };
-    }, [filteredRestaurants, loading, mapTarget]);
+    }, [loading, mapTarget, sortedRestaurants]);
+
+    const handleSelectRestaurant = (restaurant) => {
+        setSelectedRestaurantId(restaurant.id);
+        setMapTarget({
+            lat: Number(restaurant.latitude),
+            lng: Number(restaurant.longitude),
+        });
+    };
+
+    const handleSortByProximity = async () => {
+        if (userCoords) {
+            setSortByProximity((current) => !current);
+            return;
+        }
+
+        const coords = await handleMyLocation();
+        if (coords) {
+            setSortByProximity(true);
+        }
+    };
 
     return (
         <div className="restaurant-page-container">
@@ -347,8 +402,16 @@ const RestaurantExplorer = () => {
 
                     <div className="restaurant-filter-footer">
                         <span className="restaurant-results-count">
-                            Showing {filteredRestaurants.length} {filteredRestaurants.length === 1 ? 'restaurant' : 'restaurants'}
+                            Showing {sortedRestaurants.length} {sortedRestaurants.length === 1 ? 'restaurant' : 'restaurants'}
                         </span>
+                        <button
+                            type="button"
+                            className={`proximity-sort-button ${sortByProximity ? 'is-active' : ''}`}
+                            onClick={handleSortByProximity}
+                            disabled={geoLoading}
+                        >
+                            {geoLoading && !userCoords ? 'Finding location...' : 'Sort by proximity'}
+                        </button>
                         <button
                             type="button"
                             className="restaurant-clear-filters"
@@ -358,6 +421,29 @@ const RestaurantExplorer = () => {
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <div className="results-list-panel">
+                {sortedRestaurants.map((restaurant) => (
+                    <button
+                        key={restaurant.id}
+                        type="button"
+                        className={`location-list-card ${selectedRestaurantId === restaurant.id ? 'is-selected' : ''}`}
+                        onClick={() => handleSelectRestaurant(restaurant)}
+                    >
+                        <div className="location-list-heading">
+                            <h3 className="location-list-name">{restaurant.name}</h3>
+                            {restaurant.distance != null && (
+                                <span className="distance-badge">{formatDistance(restaurant.distance, 'miles')}</span>
+                            )}
+                        </div>
+                        <p className="location-list-address">{restaurant.address || 'Address unavailable'}</p>
+                        <div className="location-list-meta">
+                            {restaurant.cuisine && <span>{restaurant.cuisine}</span>}
+                            {restaurant.grade && <span>Grade {restaurant.grade}</span>}
+                        </div>
+                    </button>
+                ))}
             </div>
 
             <p className="restaurant-map-hint">Double-click a pin to view restaurant details.</p>
@@ -372,6 +458,7 @@ const RestaurantExplorer = () => {
 
                 <RestaurantMap 
                     restaurants={visibleRestaurants}
+                    selectedRestaurant={selectedRestaurant}
                     shouldClusterPins={shouldClusterPins}
                     target={derivedMapTarget} 
                 />

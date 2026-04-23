@@ -75,12 +75,16 @@ const buildPantryPopupContent = (group) => {
   return container;
 };
 
-const PantryMap = ({ pantries = [], shouldClusterPins = false, target }) => {
+const PantryMap = ({ pantries = [], selectedPantry = null, shouldClusterPins = false, target }) => {
+  const clusteredPantries = selectedPantry
+    ? pantries.filter((group) => group.id !== selectedPantry.id)
+    : pantries;
+
   return (
     <BaseMap target={target}>
       {shouldClusterPins ? (
         <ClusteredMarkerLayer
-          items={pantries}
+          items={clusteredPantries}
           getKey={(group) => group.id}
           getPosition={(group) => [group.latitude, group.longitude]}
           buildPopupContent={buildPantryPopupContent}
@@ -91,6 +95,16 @@ const PantryMap = ({ pantries = [], shouldClusterPins = false, target }) => {
         <MarkerLayer
           items={pantries}
           getKey={(group) => group.id}
+          getPosition={(group) => [group.latitude, group.longitude]}
+          buildPopupContent={buildPantryPopupContent}
+          popupClassName="pantry-popup"
+          icon={purpleIcon}
+        />
+      )}
+      {selectedPantry && (
+        <MarkerLayer
+          items={[selectedPantry]}
+          getKey={(group) => `selected-${group.id}`}
           getPosition={(group) => [group.latitude, group.longitude]}
           buildPopupContent={buildPantryPopupContent}
           popupClassName="pantry-popup"

@@ -178,12 +178,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   padding-top: 2px;
 }
 
 .restaurant-clear-filters,
-.pantry-clear-filters {
+.pantry-clear-filters,
+.proximity-sort-button {
   border: none;
   padding: 0;
   background: transparent;
@@ -195,9 +197,21 @@
 
 .restaurant-clear-filters:hover,
 .restaurant-clear-filters:focus-visible,
+.proximity-sort-button:hover,
+.proximity-sort-button:focus-visible,
 .pantry-clear-filters:hover,
 .pantry-clear-filters:focus-visible {
   text-decoration: underline;
+}
+
+.proximity-sort-button.is-active {
+  color: #5f21ba;
+}
+
+.proximity-sort-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  text-decoration: none;
 }
 
 .map-frame {
@@ -206,6 +220,77 @@
   border: 2px solid #ddd;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
+}
+
+.results-list-panel {
+  display: grid;
+  gap: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.location-list-card {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(45, 0, 102, 0.06);
+  text-align: left;
+  cursor: pointer;
+}
+
+.location-list-card.is-selected {
+  border-color: #8b3dff;
+  box-shadow: 0 6px 18px rgba(139, 61, 255, 0.18);
+}
+
+.location-list-heading,
+.location-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.location-list-heading {
+  justify-content: space-between;
+}
+
+.location-list-name {
+  margin: 0;
+  color: #2d0066;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.distance-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f2e9ff;
+  color: #6a2cc7;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.location-list-address {
+  margin: 8px 0 0;
+  color: #5f6368;
+  font-size: 0.92rem;
+}
+
+.location-list-meta {
+  margin-top: 10px;
+}
+
+.location-list-meta span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff6f6;
+  color: #de4a4a;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .leaflet-popup-content-wrapper,
