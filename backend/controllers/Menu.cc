@@ -99,16 +99,12 @@ void Menu::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
     try {
         auto result = dbClient->execSqlSync("INSERT INTO menus (restaurant_id, user_id) VALUES ($1, $2)",
                                             restaurantId, userId);
-        // return the inserted menu for debugging
-        drogon::orm::Row row = result.front();
-        Json::Value menuInfo;
-        // set the values in the return json
-        LOG_INFO << "before inserting json";
-        for (const drogon::orm::Field& field : row) {
-            menuInfo[field.name()] = field.c_str();
-            LOG_INFO << field.name() << " " << field.c_str();
-        }
-        callback(HttpResponse::newHttpJsonResponse(menuInfo));
+        auto newId = dbClient->execSqlSync("SELECT currval(pg_get_serial_sequence('menus', 'id'))");
+        // gotta get the new id
+        Json::Value ret;
+        auto row = newId.front();
+        ret["menuId"] = row.at("currval").c_str();
+        callback(HttpResponse::newHttpJsonResponse(ret));
     } catch (std::exception& e) {
         callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
     }
@@ -129,13 +125,7 @@ void Menu::updateOne(const HttpRequestPtr& req, std::function<void(const HttpRes
     std::string change = isUpvote ? "1" : "-1";
     try {
         auto result = dbClient->execSqlSync("UPDATE menus SET rating = rating + $1 WHERE id = $2", change, id);
-        drogon::orm::Row row = result.front();
-        Json::Value menuInfo;
-        // set the values in the return json
-        for (const drogon::orm::Field& field : row) {
-            menuInfo[field.name()] = field.c_str();
-        }
-        callback(HttpResponse::newHttpJsonResponse(menuInfo));
+        callback(HttpResponse::newHttpResponse(drogon::k200OK, CT_TEXT_PLAIN));
     } catch (std::exception& e) {
         callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
     }
@@ -160,13 +150,7 @@ void Menu::deleteOne(const HttpRequestPtr& req, std::function<void(const HttpRes
     auto dbClient = app().getDbClient();
     try {
         auto result = dbClient->execSqlSync("DELETE FROM menus WHERE id = $1", id);
-        drogon::orm::Row row = result.front();
-        Json::Value menuInfo;
-        // set the values in the return json
-        for (const drogon::orm::Field& field : row) {
-            menuInfo[field.name()] = field.c_str();
-        }
-        callback(HttpResponse::newHttpJsonResponse(menuInfo));
+        callback(HttpResponse::newHttpResponse(drogon::k200OK, CT_TEXT_PLAIN));
     } catch (std::exception& e) {
         callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
     }
