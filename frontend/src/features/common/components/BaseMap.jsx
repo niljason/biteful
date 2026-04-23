@@ -8,7 +8,7 @@ function MapUpdater({ target }) {
   const map = useMap();
   useEffect(() => {
     if (target?.lat != null && target?.lng != null) {
-      map.flyTo([target.lat, target.lng], 15, { duration: 1.5 });
+      map.flyTo([target.lat, target.lng], target.zoom ?? 15, { duration: 1.5 });
     }
   }, [target, map]);
   return null;
@@ -121,6 +121,7 @@ export const MarkerLayer = ({
   buildPopupContent,
   popupClassName,
   icon,
+  shouldOpenPopup = false,
 }) => {
   const normalizedItems = useMemo(
     () => getNormalizedItems(items, getKey, getPosition),
@@ -128,9 +129,47 @@ export const MarkerLayer = ({
   );
 
   return normalizedItems.map((item) => (
-    <Marker
+    <PopupMarker
       key={getKey(item)}
+      item={item}
+      popupKey={getKey(item)}
       position={getPosition(item).map(Number)}
+      buildPopupContent={buildPopupContent}
+      popupClassName={popupClassName}
+      icon={icon}
+      shouldOpenPopup={shouldOpenPopup}
+    />
+  ));
+};
+
+const PopupMarker = ({
+  item,
+  popupKey,
+  position,
+  buildPopupContent,
+  popupClassName,
+  icon,
+  shouldOpenPopup = false,
+}) => {
+  const markerRef = useRef(null);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+
+    if (!marker.getPopup()) {
+      marker.bindPopup(buildPopupContent(item), { className: popupClassName });
+    }
+
+    if (shouldOpenPopup) {
+      marker.openPopup();
+    }
+  }, [buildPopupContent, item, popupClassName, popupKey, shouldOpenPopup]);
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={position}
       icon={icon}
       eventHandlers={{
         click: (event) => {
@@ -143,7 +182,7 @@ export const MarkerLayer = ({
         },
       }}
     />
-  ));
+  );
 };
 
 export const SelectableMarkerLayers = ({
@@ -194,6 +233,7 @@ export const SelectableMarkerLayers = ({
           buildPopupContent={buildPopupContent}
           popupClassName={popupClassName}
           icon={icon}
+          shouldOpenPopup
         />
       )}
     </>

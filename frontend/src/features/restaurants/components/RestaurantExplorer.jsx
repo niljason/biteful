@@ -12,6 +12,7 @@ import './restaurants.css';
 const DIRECT_PIN_RENDER_THRESHOLD = 1200;
 const DEFERRED_CLUSTER_RENDER_THRESHOLD = 4000;
 const RESTAURANT_LIST_PAGE_SIZE = 50;
+const SELECTED_LOCATION_ZOOM = 17;
 const RestaurantExplorer = () => {
     const { 
         restaurants = [], 
@@ -199,6 +200,7 @@ const RestaurantExplorer = () => {
         setMapTarget({
             lat: Number(restaurant.latitude),
             lng: Number(restaurant.longitude),
+            zoom: SELECTED_LOCATION_ZOOM,
         });
     };
 

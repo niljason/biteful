@@ -10,6 +10,7 @@ import './pantries.css';
 
 const DIRECT_PIN_RENDER_THRESHOLD = 600;
 const DEFERRED_CLUSTER_RENDER_THRESHOLD = 2000;
+const SELECTED_LOCATION_ZOOM = 17;
 
 const DAYS_OF_WEEK = [
     'Monday',
@@ -139,6 +140,7 @@ const PantryExplorer = () => {
         setMapTarget({
             lat: Number(group.latitude),
             lng: Number(group.longitude),
+            zoom: SELECTED_LOCATION_ZOOM,
         });
     };
 
