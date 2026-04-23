@@ -285,19 +285,21 @@ const PantryExplorer = () => {
                         onClick={() => handleSelectPantry(group)}
                     >
                         <div className="location-list-heading">
-                            <h3 className="location-list-name">{group.agency}</h3>
+                            <div className="location-list-title-group">
+                                <h3 className="location-list-name">{group.agency}</h3>
+                                <div className="location-list-inline-meta">
+                                    {[...new Set(group.cleanPrograms.map((program) => program.cleanType).filter(Boolean))]
+                                        .slice(0, 3)
+                                        .map((type) => (
+                                            <span key={type}>{type}</span>
+                                        ))}
+                                </div>
+                            </div>
                             {group.distance != null && (
                                 <span className="distance-badge">{formatDistance(group.distance, 'miles')}</span>
                             )}
                         </div>
                         <p className="location-list-address">{group.fullAddress || 'Address unavailable'}</p>
-                        <div className="location-list-meta">
-                            {[...new Set(group.cleanPrograms.map((program) => program.cleanType).filter(Boolean))]
-                                .slice(0, 3)
-                                .map((type) => (
-                                    <span key={type}>{type}</span>
-                                ))}
-                        </div>
                     </button>
                 ))}
             </div>

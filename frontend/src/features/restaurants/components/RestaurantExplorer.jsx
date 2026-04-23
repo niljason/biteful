@@ -9,6 +9,7 @@ import './restaurants.css';
 
 const DIRECT_PIN_RENDER_THRESHOLD = 1200;
 const DEFERRED_CLUSTER_RENDER_THRESHOLD = 4000;
+const RESTAURANT_LIST_PAGE_SIZE = 50;
 const CUISINE_GROUP_ORDER = [
     'American',
     'Italian & Pizza',
@@ -139,6 +140,7 @@ const RestaurantExplorer = () => {
     const [userCoords, setUserCoords] = useState(null);
     const [sortByProximity, setSortByProximity] = useState(false);
     const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
+    const [visibleRestaurantCount, setVisibleRestaurantCount] = useState(RESTAURANT_LIST_PAGE_SIZE);
 
     const locationSearch = useLocationSearch((coords) => {
         setMapTarget(coords);
@@ -201,6 +203,7 @@ const RestaurantExplorer = () => {
     }, [restaurants]);
 
     const toggleSelection = (value, setSelectedValues) => {
+        setVisibleRestaurantCount(RESTAURANT_LIST_PAGE_SIZE);
         setSelectedValues((current) =>
             current.includes(value)
                 ? current.filter((item) => item !== value)
@@ -215,6 +218,7 @@ const RestaurantExplorer = () => {
             return;
         }
         setZipError("");
+        setVisibleRestaurantCount(RESTAURANT_LIST_PAGE_SIZE);
         commitZip(currentZip);
 
         const match = restaurants.find((restaurant) => restaurant.zipcode === currentZip);
@@ -279,6 +283,13 @@ const RestaurantExplorer = () => {
         [selectedRestaurantId, sortedRestaurants]
     );
 
+    const visibleRestaurantList = useMemo(
+        () => sortedRestaurants.slice(0, visibleRestaurantCount),
+        [sortedRestaurants, visibleRestaurantCount]
+    );
+
+    const hasMoreRestaurants = visibleRestaurantList.length < sortedRestaurants.length;
+
     const deferredFilteredRestaurants = useDeferredValue(sortedRestaurants);
     const visibleRestaurants = useMemo(() => {
         if (sortedRestaurants.length <= DEFERRED_CLUSTER_RENDER_THRESHOLD) {
@@ -297,6 +308,7 @@ const RestaurantExplorer = () => {
         setSortByProximity(false);
         setUserCoords(null);
         setSelectedRestaurantId(null);
+        setVisibleRestaurantCount(RESTAURANT_LIST_PAGE_SIZE);
         setMapTarget(null);
     };
 
@@ -323,14 +335,25 @@ const RestaurantExplorer = () => {
 
     const handleSortByProximity = async () => {
         if (userCoords) {
+            setVisibleRestaurantCount(RESTAURANT_LIST_PAGE_SIZE);
             setSortByProximity((current) => !current);
             return;
         }
 
         const coords = await handleMyLocation();
         if (coords) {
+            setVisibleRestaurantCount(RESTAURANT_LIST_PAGE_SIZE);
             setSortByProximity(true);
         }
+    };
+
+    const handleNameQueryChange = (event) => {
+        setVisibleRestaurantCount(RESTAURANT_LIST_PAGE_SIZE);
+        setNameQuery(event.target.value);
+    };
+
+    const handleLoadMoreRestaurants = () => {
+        setVisibleRestaurantCount((current) => current + RESTAURANT_LIST_PAGE_SIZE);
     };
 
     return (
@@ -359,7 +382,7 @@ const RestaurantExplorer = () => {
                             type="text"
                             className="restaurant-name-input"
                             value={nameQuery}
-                            onChange={(event) => setNameQuery(event.target.value)}
+                            onChange={handleNameQueryChange}
                             placeholder="Search by restaurant name or address"
                         />
                     </div>
@@ -402,7 +425,7 @@ const RestaurantExplorer = () => {
 
                     <div className="restaurant-filter-footer">
                         <span className="restaurant-results-count">
-                            Showing {sortedRestaurants.length} {sortedRestaurants.length === 1 ? 'restaurant' : 'restaurants'}
+                            Showing {Math.min(visibleRestaurantList.length, sortedRestaurants.length)} of {sortedRestaurants.length} {sortedRestaurants.length === 1 ? 'restaurant' : 'restaurants'}
                         </span>
                         <button
                             type="button"
@@ -424,7 +447,7 @@ const RestaurantExplorer = () => {
             </div>
 
             <div className="results-list-panel">
-                {sortedRestaurants.map((restaurant) => (
+                {visibleRestaurantList.map((restaurant) => (
                     <button
                         key={restaurant.id}
                         type="button"
@@ -432,18 +455,31 @@ const RestaurantExplorer = () => {
                         onClick={() => handleSelectRestaurant(restaurant)}
                     >
                         <div className="location-list-heading">
-                            <h3 className="location-list-name">{restaurant.name}</h3>
+                            <div className="location-list-title-group">
+                                <h3 className="location-list-name">{restaurant.name}</h3>
+                                {(restaurant.cuisine || restaurant.grade) && (
+                                    <div className="location-list-inline-meta">
+                                        {restaurant.cuisine && <span>{restaurant.cuisine}</span>}
+                                        {restaurant.grade && <span>Grade {restaurant.grade}</span>}
+                                    </div>
+                                )}
+                            </div>
                             {restaurant.distance != null && (
                                 <span className="distance-badge">{formatDistance(restaurant.distance, 'miles')}</span>
                             )}
                         </div>
                         <p className="location-list-address">{restaurant.address || 'Address unavailable'}</p>
-                        <div className="location-list-meta">
-                            {restaurant.cuisine && <span>{restaurant.cuisine}</span>}
-                            {restaurant.grade && <span>Grade {restaurant.grade}</span>}
-                        </div>
                     </button>
                 ))}
+                {hasMoreRestaurants && (
+                    <button
+                        type="button"
+                        className="load-more-button"
+                        onClick={handleLoadMoreRestaurants}
+                    >
+                        Load more restaurants
+                    </button>
+                )}
             </div>
 
             <p className="restaurant-map-hint">Double-click a pin to view restaurant details.</p>
