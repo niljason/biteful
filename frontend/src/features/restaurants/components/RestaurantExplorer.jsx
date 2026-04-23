@@ -159,6 +159,14 @@ const RestaurantExplorer = () => {
         fetchAll();
     }, [fetchAll]);
 
+    useEffect(() => {
+        if (!fetchAll) return;
+        if (committedZip) return;
+        if (loading || error || restaurants.length > 0) return;
+
+        fetchAll();
+    }, [committedZip, error, fetchAll, loading, restaurants.length]);
+
     const cuisineOptions = useMemo(() => {
         const counts = new Map();
 

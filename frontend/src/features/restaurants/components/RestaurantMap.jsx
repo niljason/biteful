@@ -45,9 +45,9 @@ const buildPopupContent = (restaurant, onNavigate) => {
 
             const cuisineLabel = document.createElement('span');
             cuisineLabel.className = 'rpc-category-label';
-            cuisineLabel.textContent = 'Cuisine';
+            cuisineLabel.textContent = 'Cuisine:';
 
-            const cuisineValue = document.createElement('div');
+            const cuisineValue = document.createElement('span');
             cuisineValue.className = 'rpc-detail-row';
             cuisineValue.textContent = restaurant.cuisine;
 
@@ -61,9 +61,9 @@ const buildPopupContent = (restaurant, onNavigate) => {
 
             const gradeLabel = document.createElement('span');
             gradeLabel.className = 'rpc-category-label';
-            gradeLabel.textContent = 'Grade';
+            gradeLabel.textContent = 'Grade:';
 
-            const gradeValue = document.createElement('div');
+            const gradeValue = document.createElement('span');
             gradeValue.className = 'rpc-detail-row';
             gradeValue.textContent = restaurant.grade;
 

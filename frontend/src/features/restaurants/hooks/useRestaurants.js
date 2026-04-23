@@ -67,8 +67,7 @@ const cacheRestaurants = (restaurants) => {
     return restaurants;
 };
 
-const getAllRestaurants = async () => {
-    if (allRestaurantsCache) return allRestaurantsCache;
+const getAllRestaurantsRaw = async () => {
     if (allRestaurantsRawCache) return allRestaurantsRawCache;
 
     if (!allRestaurantsPromise) {
@@ -114,10 +113,10 @@ export const useRestaurants = () => {
 
         setState(prev => ({ ...prev, loading: true, error: null }));
         try {
-            const rawData = await getAllRestaurants();
+            const rawData = await getAllRestaurantsRaw();
             if (!isMountedRef.current) return;
 
-            const restaurants = await transformRestaurants(rawData, () => !isMountedRef.current);
+            const restaurants = allRestaurantsCache || await transformRestaurants(rawData, () => !isMountedRef.current);
             if (!isMountedRef.current) return;
 
             allRestaurantsRawCache = rawData;

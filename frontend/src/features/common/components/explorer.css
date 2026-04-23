@@ -306,6 +306,11 @@
   margin-top: 10px;
 }
 
+.pantry-category-group + .pantry-category-group {
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
 .pantry-category-label,
 .rpc-category-label {
   color: #2d0066;
@@ -320,6 +325,16 @@
   font-weight: 400;
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.rpc-category-group {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.rpc-category-group + .rpc-category-group {
+  margin-top: 6px;
 }
 
 .rpc-links {

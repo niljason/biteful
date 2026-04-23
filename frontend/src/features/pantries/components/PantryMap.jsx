@@ -57,7 +57,7 @@ const PantryMap = ({ pantries = [], target }) => {
                         <span className="pantry-category-label">{category}</span>
                         {sortedDays.map((d, dIdx) => (
                           <div key={dIdx} className="pantry-day-row">
-                            <strong>{d.day_of_week}:</strong> {d.open_time} - {d.close_time}
+                            {d.day_of_week}: {d.open_time} - {d.close_time}
                           </div>
                         ))}
                       </div>
