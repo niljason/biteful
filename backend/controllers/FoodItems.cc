@@ -6,27 +6,113 @@
  */
 
 #include "FoodItems.h"
+
+#include <drogon/HttpTypes.h>
+
+#include <cstdlib>
 #include <string>
 
-
-void FoodItems::getOne(const HttpRequestPtr &req,
-                       std::function<void(const HttpResponsePtr &)> &&callback,
-                       std::string &&id)
-{
+void FoodItems::getOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
+                       std::string&& id) {
+    char* errPtr;
+    int intId = std::strtol(id.c_str(), &errPtr, 10);
+    // if the id is negative the error pointer doesn't point to the end of the string
+    if (intId < 0 || *errPtr != '\0' || id.empty()) {
+        callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+        return;
+    }
+    auto dbClient = app().getDbClient();
+    try {
+        auto result = dbClient->execSqlSync("SELECT * FROM food_items WHERE id = $1", id);
+        if (result.empty()) {
+            callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+            return;
+        }
+        drogon::orm::Row row = result.front();
+        Json::Value menuInfo;
+        // set the values in the return json
+        for (const drogon::orm::Field& field : row) {
+            menuInfo[field.name()] = field.c_str();
+        }
+        callback(HttpResponse::newHttpJsonResponse(menuInfo));
+    } catch (std::exception& e) {
+        callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
+    }
 }
 
-void FoodItems::get(const HttpRequestPtr &req,
-                    std::function<void(const HttpResponsePtr &)> &&callback)
-{
+// changed this to get while also accepting a menu id
+void FoodItems::get(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
+                    const std::string& menuId) {
+    char* errPtr;
+    int intId = std::strtol(menuId.c_str(), &errPtr, 10);
+    // if the id is negative the error pointer doesn't point to the end of the string
+    if (intId < 0 || *errPtr != '\0' || menuId.empty()) {
+        callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+        return;
+    }
+    auto dbClient = app().getDbClient();
+    try {
+        auto result = dbClient->execSqlSync("SELECT * FROM food_items WHERE menu_id = $1", menuId);
+        if (result.empty()) {
+            callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+            return;
+        }
+        Json::Value totalFoodItems;
+        // set the values in the return json
+        for (const auto& row : result) {
+            Json::Value foodItems;
+            for (const drogon::orm::Field& field : row) {
+                foodItems[field.name()] = field.c_str();
+            }
+            totalFoodItems.append(foodItems);
+        }
+        // return json with all the food items in the menu
+        callback(HttpResponse::newHttpJsonResponse(totalFoodItems));
+    } catch (std::exception& e) {
+        callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
+    }
 }
-void FoodItems::create(const HttpRequestPtr &req,
-                       std::function<void(const HttpResponsePtr &)> &&callback)
-{
+
+void FoodItems::create(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback) {
+    Json::Value body;
+    Json::Reader reader;
+    reader.parse(req->getBody().data(), body, false);
+    std::string menuId(body["menu_id"].asString());
+    std::string dishName(body["dish_name"].asString());
+    std::string menuSection(body["menu_section"].asString());
+    std::string dishDesc(body["dish_description"].asString());
+    std::string price(body["dish_price"].asString());
+    char* errPtr;
+    int intMenuId = std::strtol(menuId.c_str(), &errPtr, 10);
+    // if the id is negative the error pointer doesn't point to the end of the string
+    if (intMenuId < 0 || *errPtr != '\0' || menuId.empty()) {
+        // menu id is wrong
+        callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+        return;
+    }
+    double doublePrice = std::strtod(price.c_str(), &errPtr);
+    if (doublePrice < 0 || *errPtr != '\0' || price.empty()) {
+        // price is wrong
+        callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+        return;
+    }
+    if (dishName.empty()) {
+        // dish name (required) is empty
+        callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
+        return;
+    }
+    auto dbClient = app().getDbClient();
+    try {
+        auto result = dbClient->execSqlSync("");
+    } catch (std::exception& e) {
+        callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
+    }
 }
-void FoodItems::updateOne(const HttpRequestPtr &req,
-                          std::function<void(const HttpResponsePtr &)> &&callback,
-                          std::string &&id)
-{
+
+void FoodItems::updateOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
+                          std::string&& id) {
+    // can't update a food item
+    callback(HttpResponse::newHttpResponse(drogon::k404NotFound, drogon::CT_TEXT_PLAIN));
 }
 
 /*
@@ -36,8 +122,8 @@ void FoodItems::update(const HttpRequestPtr &req,
 
 }*/
 
-void FoodItems::deleteOne(const HttpRequestPtr &req,
-                          std::function<void(const HttpResponsePtr &)> &&callback,
-                          std::string &&id)
-{
+void FoodItems::deleteOne(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback,
+                          std::string&& id) {
+    // food items should be deleted via cascade
+    callback(HttpResponse::newHttpResponse(drogon::k404NotFound, drogon::CT_TEXT_PLAIN));
 }
