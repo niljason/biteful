@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 function MapUpdater({ target }) {
   const map = useMap();
   useEffect(() => {
-    if (target?.lat && target?.lng) {
+    if (target?.lat != null && target?.lng != null) {
       map.flyTo([target.lat, target.lng], 15, { duration: 1.5 });
     }
   }, [target, map]);
@@ -137,6 +137,60 @@ export const MarkerLayer = ({
       }}
     />
   ));
+};
+
+export const SelectableMarkerLayers = ({
+  items = [],
+  selectedItem = null,
+  shouldClusterPins = false,
+  getKey,
+  getPosition,
+  buildPopupContent,
+  popupClassName,
+  icon,
+  clusterOptions,
+}) => {
+  const baseItems = useMemo(() => {
+    if (!selectedItem) return items;
+
+    const selectedKey = getKey(selectedItem);
+    return (items || []).filter((item) => getKey(item) !== selectedKey);
+  }, [getKey, items, selectedItem]);
+
+  const sharedProps = {
+    getKey,
+    getPosition,
+    buildPopupContent,
+    popupClassName,
+    icon,
+  };
+
+  return (
+    <>
+      {shouldClusterPins ? (
+        <ClusteredMarkerLayer
+          items={baseItems}
+          clusterOptions={clusterOptions}
+          {...sharedProps}
+        />
+      ) : (
+        <MarkerLayer
+          items={baseItems}
+          {...sharedProps}
+        />
+      )}
+      {selectedItem && (
+        <MarkerLayer
+          items={[selectedItem]}
+          getKey={(item) => `selected-${getKey(item)}`}
+          getPosition={getPosition}
+          buildPopupContent={buildPopupContent}
+          popupClassName={popupClassName}
+          icon={icon}
+        />
+      )}
+    </>
+  );
 };
 
 const BaseMap = ({ target, children, center = [40.7128, -74.0060], zoom = 12 }) => {

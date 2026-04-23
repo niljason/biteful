@@ -464,7 +464,6 @@
   margin-top: 8px;
 }
 
-.rpc-links a,
 .rpc-action-link {
   color: #8b3dff;
   font-size: 0.85rem;
@@ -481,9 +480,7 @@
 }
 
 .rpc-action-link:hover,
-.rpc-action-link:focus-visible,
-.rpc-links a:hover,
-.rpc-links a:focus-visible {
+.rpc-action-link:focus-visible {
   text-decoration: underline;
 }
 

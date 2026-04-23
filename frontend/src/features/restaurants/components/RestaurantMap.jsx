@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import BaseMap, { ClusteredMarkerLayer, MarkerLayer } from '../../common/components/BaseMap';
+import BaseMap, { SelectableMarkerLayers } from '../../common/components/BaseMap';
 import { purpleIcon } from '../../common/utils/mapPins';
 import 'leaflet/dist/leaflet.css';
 
@@ -105,41 +105,19 @@ const RestaurantMap = ({ restaurants = [], selectedRestaurant = null, shouldClus
     const navigate = useNavigate();
     const buildRestaurantPopup = (restaurant) =>
         buildPopupContent(restaurant, (path, state) => navigate(path, { state }));
-    const clusteredRestaurants = selectedRestaurant
-        ? restaurants.filter((restaurant) => restaurant.id !== selectedRestaurant.id)
-        : restaurants;
 
     return (
         <BaseMap target={target}>
-            {shouldClusterPins ? (
-                <ClusteredMarkerLayer
-                    items={clusteredRestaurants}
-                    getKey={(restaurant) => restaurant.id}
-                    getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
-                    buildPopupContent={buildRestaurantPopup}
-                    popupClassName="rpc-popup"
-                    icon={purpleIcon}
-                />
-            ) : (
-                <MarkerLayer
-                    items={restaurants}
-                    getKey={(restaurant) => restaurant.id}
-                    getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
-                    buildPopupContent={buildRestaurantPopup}
-                    popupClassName="rpc-popup"
-                    icon={purpleIcon}
-                />
-            )}
-            {selectedRestaurant && (
-                <MarkerLayer
-                    items={[selectedRestaurant]}
-                    getKey={(restaurant) => `selected-${restaurant.id}`}
-                    getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
-                    buildPopupContent={buildRestaurantPopup}
-                    popupClassName="rpc-popup"
-                    icon={purpleIcon}
-                />
-            )}
+            <SelectableMarkerLayers
+                items={restaurants}
+                selectedItem={selectedRestaurant}
+                shouldClusterPins={shouldClusterPins}
+                getKey={(restaurant) => restaurant.id}
+                getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
+                buildPopupContent={buildRestaurantPopup}
+                popupClassName="rpc-popup"
+                icon={purpleIcon}
+            />
         </BaseMap>
     );
 };

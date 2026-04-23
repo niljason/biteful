@@ -1,6 +1,6 @@
 import React from 'react';
 import 'leaflet/dist/leaflet.css';
-import BaseMap, { ClusteredMarkerLayer, MarkerLayer } from '../../common/components/BaseMap';
+import BaseMap, { SelectableMarkerLayers } from '../../common/components/BaseMap';
 import { purpleIcon } from '../../common/utils/mapPins';
 
 const DAY_ORDER = {
@@ -33,11 +33,14 @@ const buildPantryPopupContent = (group) => {
     container.appendChild(addressLink);
   }
 
-  const phoneLink = document.createElement('a');
-  phoneLink.href = `tel:${group.phone?.replace(/\D/g, '')}`;
-  phoneLink.className = 'pantry-phone-link';
-  phoneLink.textContent = group.phone || 'No phone listed';
-  container.appendChild(phoneLink);
+  const phoneValue = group.phone?.trim();
+  const phoneElement = document.createElement(phoneValue ? 'a' : 'span');
+  if (phoneValue) {
+    phoneElement.href = `tel:${phoneValue.replace(/\D/g, '')}`;
+  }
+  phoneElement.className = 'pantry-phone-link';
+  phoneElement.textContent = phoneValue || 'No phone listed';
+  container.appendChild(phoneElement);
 
   const groupedPrograms = (group.programs || []).reduce((acc, program) => {
     if (!acc[program.program]) acc[program.program] = [];
@@ -76,41 +79,18 @@ const buildPantryPopupContent = (group) => {
 };
 
 const PantryMap = ({ pantries = [], selectedPantry = null, shouldClusterPins = false, target }) => {
-  const clusteredPantries = selectedPantry
-    ? pantries.filter((group) => group.id !== selectedPantry.id)
-    : pantries;
-
   return (
     <BaseMap target={target}>
-      {shouldClusterPins ? (
-        <ClusteredMarkerLayer
-          items={clusteredPantries}
-          getKey={(group) => group.id}
-          getPosition={(group) => [group.latitude, group.longitude]}
-          buildPopupContent={buildPantryPopupContent}
-          popupClassName="pantry-popup"
-          icon={purpleIcon}
-        />
-      ) : (
-        <MarkerLayer
-          items={pantries}
-          getKey={(group) => group.id}
-          getPosition={(group) => [group.latitude, group.longitude]}
-          buildPopupContent={buildPantryPopupContent}
-          popupClassName="pantry-popup"
-          icon={purpleIcon}
-        />
-      )}
-      {selectedPantry && (
-        <MarkerLayer
-          items={[selectedPantry]}
-          getKey={(group) => `selected-${group.id}`}
-          getPosition={(group) => [group.latitude, group.longitude]}
-          buildPopupContent={buildPantryPopupContent}
-          popupClassName="pantry-popup"
-          icon={purpleIcon}
-        />
-      )}
+      <SelectableMarkerLayers
+        items={pantries}
+        selectedItem={selectedPantry}
+        shouldClusterPins={shouldClusterPins}
+        getKey={(group) => group.id}
+        getPosition={(group) => [group.latitude, group.longitude]}
+        buildPopupContent={buildPantryPopupContent}
+        popupClassName="pantry-popup"
+        icon={purpleIcon}
+      />
     </BaseMap>
   );
 };
