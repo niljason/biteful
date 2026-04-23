@@ -8,6 +8,7 @@
 #include "FoodItems.h"
 
 #include <drogon/HttpTypes.h>
+#include <json/value.h>
 #include <trantor/utils/Logger.h>
 
 #include <cstdlib>
@@ -60,12 +61,22 @@ void FoodItems::get(const HttpRequestPtr& req, std::function<void(const HttpResp
             restaurantId);
         Json::Value totalFoodItems;
         // set the values in the return json
+        int lastMenu = -1;
+        Json::Value currMenu;
         for (const auto& row : result) {
-            Json::Value foodItems;
-            for (const drogon::orm::Field& field : row) {
-                foodItems[field.name()] = field.c_str();
+            // separate each entry into its own menu
+            if (lastMenu == -1) {
+                lastMenu = row["menu_id"].as<int>();
+            } else if (lastMenu != row["menu_id"].as<int>()) {
+                totalFoodItems.append(Json::Value(currMenu));
+                currMenu = Json::Value();
+                lastMenu = row["menu_id"].as<int>();
             }
-            totalFoodItems.append(foodItems);
+            Json::Value currItem;
+            for (const drogon::orm::Field& field : row) {
+                currItem[field.name()] = field.c_str();
+            }
+            currMenu.append(currItem);
         }
         // return json with all the food items in the menu
         callback(HttpResponse::newHttpJsonResponse(totalFoodItems));
