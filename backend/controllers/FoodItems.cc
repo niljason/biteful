@@ -8,6 +8,7 @@
 #include "FoodItems.h"
 
 #include <drogon/HttpTypes.h>
+#include <trantor/utils/Logger.h>
 
 #include <cstdlib>
 #include <string>
@@ -87,23 +88,36 @@ void FoodItems::create(const HttpRequestPtr& req, std::function<void(const HttpR
     // if the id is negative the error pointer doesn't point to the end of the string
     if (intMenuId < 0 || *errPtr != '\0' || menuId.empty()) {
         // menu id is wrong
+        LOG_INFO << "menu id is wrong " << menuId;
         callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
         return;
     }
     double doublePrice = std::strtod(price.c_str(), &errPtr);
     if (doublePrice < 0 || *errPtr != '\0' || price.empty()) {
         // price is wrong
+        LOG_INFO << "price is wrong " << price;
         callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
         return;
     }
     if (dishName.empty()) {
         // dish name (required) is empty
+        LOG_INFO << "dish name is empty " << dishName;
         callback(HttpResponse::newHttpResponse(drogon::k400BadRequest, drogon::CT_TEXT_PLAIN));
         return;
     }
     auto dbClient = app().getDbClient();
+    if (menuSection.empty()) {
+        menuSection = "NULL";
+    }
+    if (dishDesc.empty()) {
+        dishDesc = "NULL";
+    }
     try {
-        auto result = dbClient->execSqlSync("");
+        auto result = dbClient->execSqlSync(
+            "INSERT INTO food_items (menu_id, dish_name, menu_section, dish_desc, price) VALUES ($1, $2, $3, $4, "
+            "$5)",
+            menuId, dishName, menuSection, dishDesc, price);
+        callback(HttpResponse::newHttpResponse(drogon::k200OK, CT_TEXT_PLAIN));
     } catch (std::exception& e) {
         callback(HttpResponse::newHttpResponse(drogon::k500InternalServerError, drogon::CT_TEXT_PLAIN));
     }
