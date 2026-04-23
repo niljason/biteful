@@ -1,7 +1,6 @@
 import React from 'react';
-import { Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import BaseMap from '../../common/components/BaseMap';
+import BaseMap, { ClusteredMarkerLayer, MarkerLayer } from '../../common/components/BaseMap';
 import { purpleIcon } from '../../common/utils/mapPins';
 
 const DAY_ORDER = {
@@ -9,66 +8,95 @@ const DAY_ORDER = {
   "Friday": 5, "Saturday": 6, "Sunday": 7
 };
 
-const PantryMap = ({ pantries = [], target }) => {
+const buildPantryPopupContent = (group) => {
+  const container = document.createElement('div');
+  container.className = 'pantry-popup-container';
+
+  const title = document.createElement('h3');
+  title.textContent = group.agency || 'Unknown Agency';
+  container.appendChild(title);
+
+  const displayAddress = [
+    group.building,
+    group.street,
+    group.boro,
+    group.zipcode
+  ].filter(Boolean).join(', ');
+
+  if (displayAddress) {
+    const addressLink = document.createElement('a');
+    addressLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayAddress)}`;
+    addressLink.target = '_blank';
+    addressLink.rel = 'noopener noreferrer';
+    addressLink.className = 'pantry-address-link';
+    addressLink.textContent = displayAddress;
+    container.appendChild(addressLink);
+  }
+
+  const phoneLink = document.createElement('a');
+  phoneLink.href = `tel:${group.phone?.replace(/\D/g, '')}`;
+  phoneLink.className = 'pantry-phone-link';
+  phoneLink.textContent = group.phone || 'No phone listed';
+  container.appendChild(phoneLink);
+
+  const groupedPrograms = (group.programs || []).reduce((acc, program) => {
+    if (!acc[program.program]) acc[program.program] = [];
+    acc[program.program].push(program);
+    return acc;
+  }, {});
+
+  const list = document.createElement('div');
+  list.className = 'pantry-list-scroll';
+
+  for (const [category, days] of Object.entries(groupedPrograms)) {
+    const categoryGroup = document.createElement('div');
+    categoryGroup.className = 'pantry-category-group';
+
+    const categoryLabel = document.createElement('span');
+    categoryLabel.className = 'pantry-category-label';
+    categoryLabel.textContent = category;
+    categoryGroup.appendChild(categoryLabel);
+
+    const sortedDays = [...days].sort((a, b) =>
+      (DAY_ORDER[a.day_of_week] || 99) - (DAY_ORDER[b.day_of_week] || 99)
+    );
+
+    for (const day of sortedDays) {
+      const dayRow = document.createElement('div');
+      dayRow.className = 'pantry-day-row';
+      dayRow.textContent = `${day.day_of_week}: ${day.open_time} - ${day.close_time}`;
+      categoryGroup.appendChild(dayRow);
+    }
+
+    list.appendChild(categoryGroup);
+  }
+
+  container.appendChild(list);
+  return container;
+};
+
+const PantryMap = ({ pantries = [], shouldClusterPins = false, target }) => {
   return (
     <BaseMap target={target}>
-      {pantries.map((group) => {
-        const groupedPrograms = group.programs.reduce((acc, p) => {
-          if (!acc[p.program]) acc[p.program] = [];
-          acc[p.program].push(p);
-          return acc;
-        }, {});
-
-        const displayAddress = [
-            group.building,
-            group.street,
-            group.boro,
-            group.zipcode
-        ].filter(Boolean).join(', ');
-
-        return (
-          <Marker key={group.id} position={[group.latitude, group.longitude]} icon={purpleIcon}>
-            <Popup>
-              <div className="pantry-popup-container">
-                <h3>{group.agency}</h3>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayAddress)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pantry-address-link"
-                >
-                  {displayAddress}
-                </a>
-                <a
-                  href={`tel:${group.phone?.replace(/\D/g, '')}`}
-                  className="pantry-phone-link"
-                >
-                  {group.phone || "No phone listed"}
-                </a>
-
-                <div className="pantry-list-scroll">
-                  {Object.entries(groupedPrograms).map(([category, days], idx) => {
-                    const sortedDays = [...days].sort((a, b) =>
-                      (DAY_ORDER[a.day_of_week] || 99) - (DAY_ORDER[b.day_of_week] || 99)
-                    );
-
-                    return (
-                      <div key={idx} className="pantry-category-group">
-                        <span className="pantry-category-label">{category}</span>
-                        {sortedDays.map((d, dIdx) => (
-                          <div key={dIdx} className="pantry-day-row">
-                            {d.day_of_week}: {d.open_time} - {d.close_time}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
+      {shouldClusterPins ? (
+        <ClusteredMarkerLayer
+          items={pantries}
+          getKey={(group) => group.id}
+          getPosition={(group) => [group.latitude, group.longitude]}
+          buildPopupContent={buildPantryPopupContent}
+          popupClassName="pantry-popup"
+          icon={purpleIcon}
+        />
+      ) : (
+        <MarkerLayer
+          items={pantries}
+          getKey={(group) => group.id}
+          getPosition={(group) => [group.latitude, group.longitude]}
+          buildPopupContent={buildPantryPopupContent}
+          popupClassName="pantry-popup"
+          icon={purpleIcon}
+        />
+      )}
     </BaseMap>
   );
 };

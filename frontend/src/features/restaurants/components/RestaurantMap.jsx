@@ -1,9 +1,6 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { Marker, useMap } from 'react-leaflet';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import L from 'leaflet';
-import 'leaflet.markercluster';
-import BaseMap from '../../common/components/BaseMap';
+import BaseMap, { ClusteredMarkerLayer, MarkerLayer } from '../../common/components/BaseMap';
 import { purpleIcon } from '../../common/utils/mapPins';
 import 'leaflet/dist/leaflet.css';
 
@@ -104,141 +101,31 @@ const buildPopupContent = (restaurant, onNavigate) => {
     return container;
 };
 
-const createRestaurantMarker = (restaurant, onNavigate) => {
-    const marker = L.marker([Number(restaurant.latitude), Number(restaurant.longitude)], {
-        icon: purpleIcon,
-    });
-
-    marker.on('popupopen', () => {
-        if (marker.getPopup()) return;
-        marker.bindPopup(buildPopupContent(restaurant, onNavigate), { className: 'rpc-popup' });
-        marker.openPopup();
-    });
-
-    marker.on('click', () => {
-        if (!marker.getPopup()) {
-            marker.bindPopup(buildPopupContent(restaurant, onNavigate), { className: 'rpc-popup' });
-        }
-    });
-
-    return marker;
-};
-
-const RestaurantClusterLayer = ({ restaurants = [] }) => {
-    const map = useMap();
-    const navigate = useNavigate();
-    const clusterGroupRef = useRef(null);
-    const markerByIdRef = useRef(new Map());
-
-    const normalizedRestaurants = useMemo(() => {
-        return (restaurants || []).filter((restaurant) =>
-            restaurant &&
-            restaurant.id &&
-            restaurant.latitude != null &&
-            restaurant.longitude != null &&
-            !Number.isNaN(Number(restaurant.latitude)) &&
-            !Number.isNaN(Number(restaurant.longitude))
-        );
-    }, [restaurants]);
-
-    useEffect(() => {
-        if (clusterGroupRef.current) return;
-
-        const clusterGroup = L.markerClusterGroup({
-            chunkedLoading: true,
-            chunkInterval: 120,
-            chunkDelay: 40,
-            removeOutsideVisibleBounds: true,
-            animate: false,
-            animateAddingMarkers: false,
-            showCoverageOnHover: false,
-            maxClusterRadius: 20,
-            spiderfyOnMaxZoom: true,
-            spiderfyDistanceMultiplier: 2.5,
-            zoomToBoundsOnClick: false,
-        });
-
-        clusterGroupRef.current = clusterGroup;
-        map.addLayer(clusterGroup);
-
-        return () => {
-            map.removeLayer(clusterGroup);
-            clusterGroupRef.current = null;
-        };
-    }, [map]);
-
-    useEffect(() => {
-        const clusterGroup = clusterGroupRef.current;
-        if (!clusterGroup) return;
-
-        clusterGroup.clearLayers();
-        markerByIdRef.current.clear();
-
-        for (const restaurant of normalizedRestaurants) {
-            const marker = createRestaurantMarker(restaurant, (path, state) => {
-                navigate(path, { state });
-            });
-
-            markerByIdRef.current.set(restaurant.id, marker);
-        }
-
-        if (markerByIdRef.current.size > 0) {
-            clusterGroup.addLayers([...markerByIdRef.current.values()]);
-        }
-    }, [navigate, normalizedRestaurants]);
-
-    useEffect(() => {
-        return () => {
-            markerByIdRef.current.clear();
-        };
-    }, []);
-
-    return null;
-};
-
-const RestaurantMarkerLayer = ({ restaurants = [] }) => {
-    const navigate = useNavigate();
-
-    const normalizedRestaurants = useMemo(() => {
-        return (restaurants || []).filter((restaurant) =>
-            restaurant &&
-            restaurant.id &&
-            restaurant.latitude != null &&
-            restaurant.longitude != null &&
-            !Number.isNaN(Number(restaurant.latitude)) &&
-            !Number.isNaN(Number(restaurant.longitude))
-        );
-    }, [restaurants]);
-
-    return normalizedRestaurants.map((restaurant) => (
-        <Marker
-            key={restaurant.id}
-            position={[Number(restaurant.latitude), Number(restaurant.longitude)]}
-            icon={purpleIcon}
-            eventHandlers={{
-                click: (event) => {
-                    const marker = event.target;
-                    if (!marker.getPopup()) {
-                        marker.bindPopup(
-                            buildPopupContent(restaurant, (path, state) => navigate(path, { state })),
-                            { className: 'rpc-popup' }
-                        );
-                    }
-
-                    marker.openPopup();
-                },
-            }}
-        />
-    ));
-};
-
 const RestaurantMap = ({ restaurants = [], shouldClusterPins = false, target }) => {
+    const navigate = useNavigate();
+    const buildRestaurantPopup = (restaurant) =>
+        buildPopupContent(restaurant, (path, state) => navigate(path, { state }));
+
     return (
         <BaseMap target={target}>
             {shouldClusterPins ? (
-                <RestaurantClusterLayer restaurants={restaurants} />
+                <ClusteredMarkerLayer
+                    items={restaurants}
+                    getKey={(restaurant) => restaurant.id}
+                    getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
+                    buildPopupContent={buildRestaurantPopup}
+                    popupClassName="rpc-popup"
+                    icon={purpleIcon}
+                />
             ) : (
-                <RestaurantMarkerLayer restaurants={restaurants} />
+                <MarkerLayer
+                    items={restaurants}
+                    getKey={(restaurant) => restaurant.id}
+                    getPosition={(restaurant) => [restaurant.latitude, restaurant.longitude]}
+                    buildPopupContent={buildRestaurantPopup}
+                    popupClassName="rpc-popup"
+                    icon={purpleIcon}
+                />
             )}
         </BaseMap>
     );

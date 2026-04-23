@@ -1,10 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useDeferredValue, useState, useMemo } from 'react';
 import { usePantries } from '../hooks/usePantries';
 import PantryMap from './PantryMap';
 import { useLocationSearch } from '../../common/useLocationSearch'
 import ZipSearchInput from '../../common/components/ZipSearchInput';
 import '../../common/components/explorer.css';
 import './pantries.css';
+
+const DIRECT_PIN_RENDER_THRESHOLD = 600;
+const DEFERRED_CLUSTER_RENDER_THRESHOLD = 2000;
 
 const DAYS_OF_WEEK = [
     'Monday',
@@ -84,7 +87,6 @@ const PantryExplorer = () => {
     const filteredGroups = useMemo(() => {
         return processedGroups.filter((group) => {
             if (committedZip.length === 5) {
-                console.log(`Checking Input: "${committedZip}" against Data: "${group.zipcode}"`);
                 if (group.zipcode !== committedZip) return false;
             }
 
@@ -105,6 +107,16 @@ const PantryExplorer = () => {
             return true;
         });
     }, [processedGroups, committedZip, selectedDays, selectedTypes]);
+
+    const deferredFilteredGroups = useDeferredValue(filteredGroups);
+    const visibleGroups = useMemo(() => {
+        if (filteredGroups.length <= DEFERRED_CLUSTER_RENDER_THRESHOLD) {
+            return filteredGroups;
+        }
+
+        return deferredFilteredGroups;
+    }, [deferredFilteredGroups, filteredGroups]);
+    const shouldClusterPins = visibleGroups.length > DIRECT_PIN_RENDER_THRESHOLD;
 
     const handleSearch = () => {
         const currentZip = inputRef.current?.value || "";
@@ -200,7 +212,13 @@ const PantryExplorer = () => {
             </div>
 
             <div className="map-frame">
-                {!loading && <PantryMap pantries={filteredGroups} target={mapTarget} />}
+                {!loading && (
+                    <PantryMap
+                        pantries={visibleGroups}
+                        shouldClusterPins={shouldClusterPins}
+                        target={mapTarget}
+                    />
+                )}
             </div>
         </div>
     );

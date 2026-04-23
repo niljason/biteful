@@ -131,7 +131,6 @@ const RestaurantExplorer = () => {
         restaurants = [], 
         loading = false, 
         error = null, 
-        fetchByZipcode,
         fetchAll 
     } = useRestaurants() || {};
 
@@ -150,7 +149,8 @@ const RestaurantExplorer = () => {
         geoLoading = false, 
         handleZipChange = () => {}, 
         handleMyLocation = () => {},
-        commitZip = () => {}
+        commitZip = () => {},
+        resetZip = () => {}
     } = locationSearch;
 
     useEffect(() => {
@@ -212,13 +212,24 @@ const RestaurantExplorer = () => {
         }
         setZipError("");
         commitZip(currentZip);
-        if (fetchByZipcode) fetchByZipcode(currentZip);
+
+        const match = restaurants.find((restaurant) => restaurant.zipcode === currentZip);
+        if (match?.latitude && match?.longitude) {
+            setMapTarget({
+                lat: Number(match.latitude),
+                lng: Number(match.longitude),
+            });
+        }
     };
 
     const filteredRestaurants = useMemo(() => {
         const normalizedQuery = nameQuery.trim().toLowerCase();
 
         return restaurants.filter((restaurant) => {
+            if (committedZip.length === 5 && restaurant.zipcode !== committedZip) {
+                return false;
+            }
+
             if (normalizedQuery) {
                 const matchesName = restaurant.name?.toLowerCase().includes(normalizedQuery);
                 const matchesAddress = restaurant.address?.toLowerCase().includes(normalizedQuery);
@@ -235,7 +246,7 @@ const RestaurantExplorer = () => {
 
             return true;
         });
-    }, [nameQuery, restaurants, selectedCuisines, selectedGrades]);
+    }, [committedZip, nameQuery, restaurants, selectedCuisines, selectedGrades]);
     const deferredFilteredRestaurants = useDeferredValue(filteredRestaurants);
     const visibleRestaurants = useMemo(() => {
         if (filteredRestaurants.length <= DEFERRED_CLUSTER_RENDER_THRESHOLD) {
@@ -247,24 +258,25 @@ const RestaurantExplorer = () => {
     const shouldClusterPins = visibleRestaurants.length > DIRECT_PIN_RENDER_THRESHOLD;
 
     const clearFilters = () => {
+        resetZip();
         setNameQuery('');
         setSelectedCuisines([]);
         setSelectedGrades([]);
+        setMapTarget(null);
     };
 
     const derivedMapTarget = useMemo(() => {
         if (mapTarget) return mapTarget;
-        if (loading || restaurants.length === 0) return null;
+        if (loading || filteredRestaurants.length === 0) return null;
 
-        const hasActiveFilters = Boolean(nameQuery.trim()) || selectedCuisines.length > 0 || selectedGrades.length > 0;
-        const first = hasActiveFilters ? filteredRestaurants[0] : restaurants[0];
+        const first = filteredRestaurants[0];
         if (!first?.latitude || !first?.longitude) return null;
 
         return {
             lat: Number(first.latitude),
             lng: Number(first.longitude)
         };
-    }, [filteredRestaurants, loading, mapTarget, nameQuery, restaurants, selectedCuisines.length, selectedGrades.length]);
+    }, [filteredRestaurants, loading, mapTarget]);
 
     return (
         <div className="restaurant-page-container">
