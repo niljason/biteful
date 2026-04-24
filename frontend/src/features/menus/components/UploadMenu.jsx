@@ -24,17 +24,10 @@ const UploadMenu = ({ restaurantId }) => {
             body: data,
             method: "POST",
         };
-        const resp = await fetch(
-            import.meta.env.VITE_API_BASE_URL + "ocr/",
-            config,
-        );
-        if (resp.ok) {
-            await resp.json();
-        }
-        if (!resp.ok) {
-            const errorData = await resp.json().catch(() => ({}));
-            throw new Error(
-                errorData.error || `Server returned ${resp.status}`,
+        try {
+            const resp = await fetch(
+                import.meta.env.VITE_API_BASE_URL + "ocr/",
+                config,
             );
             if (resp.ok) {
                 console.log("ok");
