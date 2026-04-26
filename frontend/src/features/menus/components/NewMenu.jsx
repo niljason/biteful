@@ -11,13 +11,13 @@ const NewMenu = ({ restaurantId, items, setItems, restaurantState }) => {
     let displayedContent = [];
     for (const item of items) {
         let currInd = itemNum;
-        let onChange = (event) => {
-            let name = event.target.name;
-            let newItems = items.map((value, index) => {
+        const onChange = (event) => {
+            const { name, value } = event.target;
+            const newItems = items.map((item, index) => {
                 if (index === currInd) {
-                    value[name] = event.target.value;
+                    return { ...item, [name]: value }; // Create a fresh copy
                 }
-                return value;
+                return item;
             });
             setItems(newItems);
         };
