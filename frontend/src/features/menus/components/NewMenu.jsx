@@ -140,7 +140,7 @@ const NewMenu = ({ restaurantId, items, setItems, restaurantState }) => {
                     )}
                 </div>
             </form>
-            <p className="menu-page-meta">This is a work in progress</p>
+            {/*<p className="menu-page-meta">This is a work in progress</p>*/}
         </div>
     );
 };
