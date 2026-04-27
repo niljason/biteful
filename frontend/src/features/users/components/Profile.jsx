@@ -14,6 +14,10 @@ const TIMEFRAME_OPTIONS = [
 const CHART_WIDTH = 560;
 const CHART_HEIGHT = 240;
 const CHART_PADDING = 24;
+const CHART_LEFT_PADDING = 56;
+const CHART_RIGHT_PADDING = 24;
+const CHART_TOP_PADDING = 24;
+const CHART_BOTTOM_PADDING = 40;
 const RECENT_ACTIVITY_PAGE_SIZE = 5;
 const CHART_EXPORT_STYLES = `
   .progress-chart {
@@ -25,6 +29,11 @@ const CHART_EXPORT_STYLES = `
   .chart-axis {
     stroke: rgba(90, 30, 194, 0.35);
     stroke-width: 2;
+  }
+  .chart-grid-line {
+    stroke: rgba(138, 63, 252, 0.12);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
   }
   .chart-line {
     stroke: #8a3ffc;
@@ -45,27 +54,70 @@ const CHART_EXPORT_STYLES = `
   .chart-point.active {
     fill: #8a3ffc;
   }
+  .chart-axis-label,
+  .chart-tick-label {
+    fill: #5f6368;
+    font-family: Arial, sans-serif;
+  }
+  .chart-axis-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .chart-tick-label {
+    font-size: 11px;
+    font-weight: 600;
+  }
 `;
 
 const buildChartGeometry = (data) => {
   if (!data.length) {
-    return { positions: [], polylinePoints: "" };
+    return {
+      positions: [],
+      polylinePoints: "",
+      minValue: 0,
+      maxValue: 0,
+      yTicks: [],
+      xTickIndexes: [],
+    };
   }
 
   const maxValue = Math.max(...data.map((item) => item.cumulative_points), 0);
   const minValue = Math.min(...data.map((item) => item.cumulative_points), 0);
   const range = maxValue - minValue || 1;
-  const usableWidth = CHART_WIDTH - CHART_PADDING * 2;
-  const usableHeight = CHART_HEIGHT - CHART_PADDING * 2;
+  const usableWidth = CHART_WIDTH - CHART_LEFT_PADDING - CHART_RIGHT_PADDING;
+  const usableHeight = CHART_HEIGHT - CHART_TOP_PADDING - CHART_BOTTOM_PADDING;
+
+  const yTicks = Array.from({ length: 4 }, (_, index) => {
+    const ratio = index / 3;
+    const value = maxValue - ratio * (maxValue - minValue);
+    const y = CHART_TOP_PADDING + ratio * usableHeight;
+
+    return {
+      value: Math.round(value),
+      y,
+    };
+  });
+
+  const xTickIndexes = [];
+  const targetTickCount = Math.min(4, data.length);
+  for (let tick = 0; tick < targetTickCount; tick += 1) {
+    const ratio = targetTickCount === 1 ? 0 : tick / (targetTickCount - 1);
+    const index = Math.round(ratio * (data.length - 1));
+    if (!xTickIndexes.includes(index)) {
+      xTickIndexes.push(index);
+    }
+  }
 
   const positions = data.map((item, index) => {
     const x =
       data.length === 1
         ? CHART_WIDTH / 2
-        : CHART_PADDING + (index / (data.length - 1)) * usableWidth;
+        : CHART_LEFT_PADDING + (index / (data.length - 1)) * usableWidth;
     const y =
       CHART_HEIGHT -
-      CHART_PADDING -
+      CHART_BOTTOM_PADDING -
       ((item.cumulative_points - minValue) / range) * usableHeight;
 
     return { ...item, x, y };
@@ -73,9 +125,34 @@ const buildChartGeometry = (data) => {
 
   return {
     positions,
+    minValue,
+    maxValue,
+    yTicks,
+    xTickIndexes,
     polylinePoints: positions
       .map((point) => `${point.x},${point.y}`)
       .join(" "),
+  };
+};
+
+const getXAxisLabelProps = (point, index, total) => {
+  if (index === 0) {
+    return {
+      x: point.x + 8,
+      textAnchor: "start",
+    };
+  }
+
+  if (index === total - 1) {
+    return {
+      x: point.x - 8,
+      textAnchor: "end",
+    };
+  }
+
+  return {
+    x: point.x,
+    textAnchor: "middle",
   };
 };
 
@@ -90,7 +167,7 @@ const ProgressChart = ({ data, timeframe }) => {
     );
   }
 
-  const { positions, polylinePoints } = buildChartGeometry(data);
+  const { positions, polylinePoints, yTicks, xTickIndexes } = buildChartGeometry(data);
   const activePositionIndex = positions.findIndex(
     (point) => point.label === activeKey,
   );
@@ -125,18 +202,37 @@ const ProgressChart = ({ data, timeframe }) => {
         role="img"
         aria-label={`${timeframe} points progress chart`}
       >
+        {yTicks.map((tick) => (
+          <g key={`${timeframe}-y-${tick.y}`}>
+            <line
+              x1={CHART_LEFT_PADDING}
+              y1={tick.y}
+              x2={CHART_WIDTH - CHART_RIGHT_PADDING}
+              y2={tick.y}
+              className="chart-grid-line"
+            />
+            <text
+              x={CHART_LEFT_PADDING - 10}
+              y={tick.y + 4}
+              textAnchor="end"
+              className="chart-tick-label"
+            >
+              {tick.value}
+            </text>
+          </g>
+        ))}
         <line
-          x1={CHART_PADDING}
-          y1={CHART_HEIGHT - CHART_PADDING}
-          x2={CHART_WIDTH - CHART_PADDING}
-          y2={CHART_HEIGHT - CHART_PADDING}
+          x1={CHART_LEFT_PADDING}
+          y1={CHART_HEIGHT - CHART_BOTTOM_PADDING}
+          x2={CHART_WIDTH - CHART_RIGHT_PADDING}
+          y2={CHART_HEIGHT - CHART_BOTTOM_PADDING}
           className="chart-axis"
         />
         <line
-          x1={CHART_PADDING}
-          y1={CHART_PADDING}
-          x2={CHART_PADDING}
-          y2={CHART_HEIGHT - CHART_PADDING}
+          x1={CHART_LEFT_PADDING}
+          y1={CHART_TOP_PADDING}
+          x2={CHART_LEFT_PADDING}
+          y2={CHART_HEIGHT - CHART_BOTTOM_PADDING}
           className="chart-axis"
         />
         <polyline
@@ -153,7 +249,7 @@ const ProgressChart = ({ data, timeframe }) => {
           >
             <line
               x1={point.x}
-              y1={CHART_HEIGHT - CHART_PADDING}
+              y1={CHART_HEIGHT - CHART_BOTTOM_PADDING}
               x2={point.x}
               y2={point.y}
               className="chart-guide"
@@ -167,20 +263,48 @@ const ProgressChart = ({ data, timeframe }) => {
             />
           </g>
         ))}
-      </svg>
+        {xTickIndexes.map((index, tickIndex) => {
+          const point = positions[index];
+          if (!point) {
+            return null;
+          }
 
-      <div className="progress-chart-labels">
-        {positions.map((point, index) => (
-          <button
-            key={point.label}
-            type="button"
-            className={index === safeIndex ? "chart-label active" : "chart-label"}
-            onClick={() => setActiveKey(point.label)}
-          >
-            {point.label}
-          </button>
-        ))}
-      </div>
+          const labelProps = getXAxisLabelProps(
+            point,
+            tickIndex,
+            xTickIndexes.length,
+          );
+
+          return (
+            <text
+              key={`${timeframe}-x-${point.label}`}
+              x={labelProps.x}
+              y={CHART_HEIGHT - 18}
+              textAnchor={labelProps.textAnchor}
+              className="chart-tick-label"
+            >
+              {point.label}
+            </text>
+          );
+        })}
+        <text
+          x={CHART_WIDTH / 2}
+          y={CHART_HEIGHT - 2}
+          textAnchor="middle"
+          className="chart-axis-label"
+        >
+          Time Period
+        </text>
+        <text
+          x={16}
+          y={CHART_HEIGHT / 2}
+          textAnchor="middle"
+          transform={`rotate(-90 16 ${CHART_HEIGHT / 2})`}
+          className="chart-axis-label"
+        >
+          Running Points
+        </text>
+      </svg>
     </div>
   );
 };
