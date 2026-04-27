@@ -276,17 +276,6 @@ section {
 
 .delete-account-btn:hover { background-color: #ff5252; }
 
-.view-history-btn {
-  width: 100%;
-  padding: 14px;
-  background: #2e7d32;
-  color: white;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-weight: 800;
-  cursor: pointer;
-}
-
 /* --- Save & Cancel Button Styling --- */
 
 .edit-actions {

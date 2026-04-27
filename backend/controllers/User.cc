@@ -78,9 +78,6 @@ void User::create(const HttpRequestPtr& req, std::function<void(const HttpRespon
 void User::getOne(const HttpRequestPtr& req,
                  std::function<void(const HttpResponsePtr&)>&& callback,
                  std::string&& id) {
-    
-    char* end;
-
     // validation
     if (!isValidId(id)) {
         auto resp = HttpResponse::newHttpResponse();

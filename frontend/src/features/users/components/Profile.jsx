@@ -13,7 +13,6 @@ const TIMEFRAME_OPTIONS = [
 
 const CHART_WIDTH = 560;
 const CHART_HEIGHT = 240;
-const CHART_PADDING = 24;
 const CHART_LEFT_PADDING = 56;
 const CHART_RIGHT_PADDING = 24;
 const CHART_TOP_PADDING = 24;
@@ -76,8 +75,6 @@ const buildChartGeometry = (data) => {
     return {
       positions: [],
       polylinePoints: "",
-      minValue: 0,
-      maxValue: 0,
       yTicks: [],
       xTickIndexes: [],
     };
@@ -125,8 +122,6 @@ const buildChartGeometry = (data) => {
 
   return {
     positions,
-    minValue,
-    maxValue,
     yTicks,
     xTickIndexes,
     polylinePoints: positions
@@ -402,6 +397,7 @@ const Profile = () => {
     defs.appendChild(style);
     svgClone.insertBefore(defs, svgClone.firstChild);
 
+    // Embed the SVG styles directly so the exported PNG matches the on-page chart.
     const serializer = new XMLSerializer();
     const svgMarkup = serializer.serializeToString(svgClone);
     const svgBlob = new Blob([svgMarkup], {
