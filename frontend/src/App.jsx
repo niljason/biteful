@@ -6,7 +6,6 @@ import {
 import MainLayout from "./layouts/MainLayout";
 import LoginForm from "./features/auth/components/LoginForm";
 import SignupForm from "./features/users/components/SignupForm";
-import Dashboard from "./features/users/components/Dashboard";
 import PantryExplorer from "./features/pantries/components/PantryExplorer";
 import Profile from "./features/users/components/Profile";
 import RestaurantExplorer from "./features/restaurants/components/RestaurantExplorer";
@@ -25,7 +24,7 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <MainLayout>
-        <Dashboard />
+        <Profile />
       </MainLayout>
     ),
     loader: isAuthenticated,
@@ -45,15 +44,6 @@ const router = createBrowserRouter([
         <SignupForm />
       </MainLayout>
     ),
-  },
-  {
-    path: "/dashboard",
-    element: (
-      <MainLayout>
-        <Dashboard />
-      </MainLayout>
-    ),
-    loader: isAuthenticated,
   },
   {
     path: "/map/pantry",
