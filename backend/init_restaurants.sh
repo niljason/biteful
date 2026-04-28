@@ -25,7 +25,7 @@ CREATE TEMP TABLE staging_restaurants (
     zipcode TEXT, phone TEXT, cuisine_description TEXT, inspection_date TEXT,
     action TEXT, violation_code TEXT, violation_description TEXT, 
     critical_flag TEXT, score TEXT, grade TEXT, grade_date TEXT, 
-    record_date TEXT, inspection_type TEXT, latitude TEXT, longitude TEXT,
+    record_date TEXT, inspection_type TEXT, longitude TEXT, latitude TEXT,
     council_district TEXT, bin TEXT, community_board TEXT, nta TEXT, 
     census_tract TEXT, bbl TEXT, location TEXT
 );
@@ -50,7 +50,10 @@ SELECT DISTINCT ON (camis::INT)
         WHEN inspection_date LIKE '1900%' OR inspection_date = '' THEN NULL 
         ELSE (inspection_date::TIMESTAMP)::DATE 
     END,
-    NULLIF(TRIM(grade), ''),
+    CASE
+        WHEN TRIM(grade) IN ('', 'N', 'Z') THEN NULL
+        ELSE TRIM(grade)
+    END,
     NULLIF(latitude, '')::DOUBLE PRECISION,
     NULLIF(longitude, '')::DOUBLE PRECISION
 FROM staging_restaurants

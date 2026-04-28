@@ -20,10 +20,16 @@ const Navbar = ({ isAuthenticated, onLogout }) => {
                 {isAuthenticated && (
                     <>
                         <Link 
-                            to="/dashboard" 
-                            className={`nav-link ${location.pathname === '/dashboard' ? 'active-red' : ''}`}
+                            to="/profile" 
+                            className={`nav-link ${location.pathname === '/profile' ? 'active-red' : ''}`}
                         >
-                            DASHBOARD
+                            PROFILE
+                        </Link>
+                        <Link
+                            to="/map/restaurant"
+                            className={`nav-link ${location.pathname === '/map/restaurant' ? 'active-red' : ''}`}
+                        >
+                            RESTAURANT
                         </Link>
                         <Link 
                             to="/map/pantry" 

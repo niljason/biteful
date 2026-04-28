@@ -12,7 +12,7 @@ const LoginForm = () => {
         e.preventDefault();
         const success = await login(username, password);
         if (success) {
-            navigate("/dashboard"); // Redirect after successful Drogon auth
+            navigate("/profile"); // Redirect after successful Drogon auth
         }
     };
 
