@@ -90,15 +90,6 @@ const NewMenu = ({ restaurantId, items, setItems, restaurantState }) => {
                 throw new Error("Server did not return a menu ID. Check the console for the full response.");
             }
 
-            // submit new items with the new menu
-            /*for (const item of items) {
-                const foodItemResp = await drogonClient("foodItems", {
-                    method: "POST",
-                    body: JSON.stringify({ ...item, menu_id: menuResp.menuId }),
-                });
-                console.log("food resp", foodItemResp);
-            }*/
-
             // Pass index to backend
             for (let i = 0; i < items.length; i++) {
             const foodItemResp = await drogonClient("foodItems", {
@@ -109,7 +100,6 @@ const NewMenu = ({ restaurantId, items, setItems, restaurantState }) => {
 
             setSubmitStatus('success');
             // navigate to menu viewer so the new menu is visible
-            
             // Poll until all items have been scored, every 500ms up to 30 times (15s max)
             const waitForScores = async () => {
                 for (let attempt = 0; attempt < 30; attempt++) {
@@ -122,7 +112,7 @@ const NewMenu = ({ restaurantId, items, setItems, restaurantState }) => {
                     ).length;
                     if (scored >= items.length) return;
                 }
-                console.warn("Polling timed out — some items may not be scored yet");
+                console.warn("Polling timed out, some items may not be scored yet");
             };
 
             await waitForScores();
