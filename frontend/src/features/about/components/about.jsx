@@ -55,7 +55,7 @@ const About = () => {
             <div className="about-team-grid">
               {['Jason Lin', 'Perry Huang', 'Angel Mejia', 'Remi Uy'].map((name) => (
                 <div key={name} className="team-mini-box">
-                  <div className="team-icon">👤</div>
+                  <div className="team-icon">☺︎</div>
                   <strong>{name}</strong>
                 </div>
               ))}

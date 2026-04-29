@@ -10,7 +10,7 @@ const ZipSearchInput = ({
 }) => (
     <div className="pantry-location-container">
         <div className="pantry-input-wrapper">
-            <div className="pantry-search-button-sq" onClick={onSearch}>🔍</div>
+            <div className="pantry-search-button-sq" onClick={onSearch}>🔎︎</div>
             <input 
                 ref={inputRef}
                 type="text"
