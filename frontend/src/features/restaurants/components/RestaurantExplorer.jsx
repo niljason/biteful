@@ -229,7 +229,7 @@ const RestaurantExplorer = () => {
                     </label>
                     <div className="restaurant-name-input-wrapper">
                         <div className="pantry-search-button-sq" onClick={() => document.getElementById('restaurant-name-search').focus()}>
-                            🔍
+                            🔎︎
                         </div>
                         <input
                             id="restaurant-name-search"
