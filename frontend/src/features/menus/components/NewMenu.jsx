@@ -91,19 +91,43 @@ const NewMenu = ({ restaurantId, items, setItems, restaurantState }) => {
             }
 
             // submit new items with the new menu
-            for (const item of items) {
+            /*for (const item of items) {
                 const foodItemResp = await drogonClient("foodItems", {
                     method: "POST",
                     body: JSON.stringify({ ...item, menu_id: menuResp.menuId }),
                 });
                 console.log("food resp", foodItemResp);
+            }*/
+
+            // Pass index to backend
+            for (let i = 0; i < items.length; i++) {
+            const foodItemResp = await drogonClient("foodItems", {
+                method: "POST",
+                body: JSON.stringify({ ...items[i], menu_id: menuResp.menuId, item_index: i }),
+                });
             }
 
             setSubmitStatus('success');
             // navigate to menu viewer so the new menu is visible
-            setTimeout(() => {
-                navigate(`/${restaurantId}/menu`, { state: restaurantState });
-            }, 1000);
+            
+            // Poll until all items have been scored, every 500ms up to 30 times (15s max)
+            const waitForScores = async () => {
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    await new Promise(r => setTimeout(r, 500));
+                    const data = await drogonClient(`foodItems/${restaurantId}`);
+                    const allItems = data[0] ?? [];
+                    const scored = allItems.filter(item => 
+                        item.health_points !== null && 
+                        item.health_points !== "null"
+                    ).length;
+                    if (scored >= items.length) return;
+                }
+                console.warn("Polling timed out — some items may not be scored yet");
+            };
+
+            await waitForScores();
+            navigate(`/${restaurantId}/menu`, { state: restaurantState });
+        
         } catch (err) {
             console.error("Finalize menu error:", err);
             setSubmitError(err.message || "Something went wrong.");
