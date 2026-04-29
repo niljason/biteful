@@ -59,7 +59,7 @@ int main() {
         }
     }
 
-    bool localhost = false;
+    bool localhost = getenv("LOCALHOST") != NULL;
     std::string origin = "http://localhost:5173";
     if (!localhost) {
         origin = "https://pearmeow-biteful.netlify.app";
