@@ -2,6 +2,16 @@
 
 An app that promotes healthy eating.
 
+## Simplified Instructions
+
+This simplified script will set up everything to allow for a localhost development.
+
+    ```bash
+    git clone git@github.com:niljason/biteful.git
+    cd biteful
+    ./script.sh
+    ```
+
 ## Instructions
 
 These instructions were tested on Linux (Ubuntu/Debian) machines.
@@ -63,12 +73,20 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     ```
 
     Create another `.env` file located in `~/biteful/backend` and it should look
-    like the following. Make sure the user and password match what you set above.
+    like the following. Make sure the user and password match what you set above. Note you will have to obtain the API keys yourself.
 
     ```bash
     DB_NAME=biteful
     DB_USER=user
     DB_PASSWORD=password
+    OCR_API="https://api.veryfi.com/"
+    OCR_API_PATH="/api/v8/partner/any-documents"
+    OCR_CLIENT_ID=""
+    OCR_USERNAME=""
+    OCR_API_KEY=""
+    ANTHROPIC_API_KEY=""
+    LOCALHOST="true"
+
     ```
 
 5. Install Backend Dependencies (C++, Drogon, Libsodium)
@@ -84,7 +102,7 @@ These instructions were tested on Linux (Ubuntu/Debian) machines.
     ```bash
     sudo apt install libjsoncpp-dev uuid-dev \
     zlib1g-dev libssl-dev libyaml-cpp-dev \
-    libsodium-dev pkg-config
+    libsodium-dev pkg-config unzip
     ```
 
     Install the drogon framework so that `drogon_ctl` can be used.
